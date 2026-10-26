@@ -1,46 +1,501 @@
-<div class="page-heading-row"><div><p class="eyebrow">Módulo 1 · Citas y admisión</p><h1 class="page-title">Agenda clínica</h1><p class="page-subtitle">Citas registradas · {{ items().length }}</p></div></div>
-@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
-@if (success()) { <p class="success-message" role="status">{{ success() }}</p> }
+<div class="page-heading-row">
+  <div>
+    <p class="eyebrow">Módulo 1 · Citas y admisión</p>
+    <h1 class="page-title">Agenda clínica</h1>
+    <p class="page-subtitle">Citas registradas · {{ items().length }}</p>
+  </div>
+</div>
+
+@if (error()) {
+  <p class="error-message" role="alert">{{ error() }}</p>
+}
+@if (success()) {
+  <p class="success-message" role="status">{{ success() }}</p>
+}
+
 <section class="transaction-card appointment-workflow" aria-labelledby="appointment-title">
   <header class="transaction-head">
     <span class="transaction-mark">01</span>
-    <div><p class="eyebrow">{{ editingId() ? 'Modificar agenda' : 'Nueva operación' }}</p><h2 id="appointment-title">{{ editingId() ? 'Editar cita' : 'Programar cita' }}</h2></div>
-    @if (editingId()) { <button class="text-link transaction-cancel" type="button" (click)="cancelarEdicion()">Cancelar edición</button> }
+    <div>
+      <p class="eyebrow">{{ editingId() ? 'Modificar agenda' : 'Nueva operación' }}</p>
+      <h2 id="appointment-title">{{ editingId() ? 'Editar cita' : 'Programar cita' }}</h2>
+    </div>
+    @if (editingId()) {
+      <button class="text-link transaction-cancel" type="button" (click)="cancelarEdicion()">
+        Cancelar edición
+      </button>
+    }
   </header>
   <form class="transaction-layout" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
     <div class="transaction-main">
       <section class="transaction-section">
-        <div class="transaction-section-title"><span>1</span><div><h3>Cabecera de cita</h3><p>Paciente y horario de atención</p></div></div>
+        <div class="transaction-section-title">
+          <span>1</span>
+          <div>
+            <h3>Cabecera de cita</h3>
+            <p>Paciente y horario de atención</p>
+          </div>
+        </div>
         <div class="clinic-form-grid">
-          <div class="field"><label for="cita-paciente">Paciente *</label><select id="cita-paciente" formControlName="idPaciente"><option value="" disabled>Selecciona paciente</option>@for (p of pacientes(); track p.id) { <option [value]="p.id">{{ p.apellidos }}, {{ p.nombres }} · {{ p.dni }}</option> }</select></div>
-          <div class="field"><label for="fecha-hora">Fecha y hora *</label><input id="fecha-hora" type="datetime-local" formControlName="fechaHora" /></div>
+          <div class="field">
+            <label for="cita-paciente">Paciente *</label>
+            <select id="cita-paciente" formControlName="idPaciente">
+              <option value="" disabled>Selecciona paciente</option>
+              @for (p of pacientes(); track p.id) {
+                <option [value]="p.id">{{ p.apellidos }}, {{ p.nombres }} · {{ p.dni }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="fecha-hora">Fecha y hora *</label>
+            <input id="fecha-hora" type="datetime-local" formControlName="fechaHora" />
+          </div>
         </div>
       </section>
       <section class="transaction-section">
-        <div class="transaction-section-title"><span>2</span><div><h3>Procedimientos solicitados</h3><p>Detalle de la cita · {{ detalles().length }} ítems</p></div></div>
+        <div class="transaction-section-title">
+          <span>2</span>
+          <div>
+            <h3>Procedimientos solicitados</h3>
+            <p>Detalle de la cita · {{ detalles().length }} ítems</p>
+          </div>
+        </div>
         <div class="detail-entry-grid">
-          <div class="field"><label for="cita-procedimiento">Procedimiento *</label><select id="cita-procedimiento" formControlName="idProcedimiento"><option value="" disabled>Selecciona procedimiento</option>@for (p of procedimientos(); track p.id) { <option [value]="p.id">{{ p.nombre }} · S/ {{ p.precio | number:'1.2-2' }}</option> }</select></div>
-          <div class="field"><label for="observaciones-cita">Observaciones</label><input id="observaciones-cita" formControlName="observacionesDetalle" maxlength="500" /></div>
-          <button class="button-secondary" type="button" (click)="agregarProcedimiento()" [disabled]="procedimientos().length === 0">Añadir al detalle</button>
+          <div class="field">
+            <label for="cita-procedimiento">Procedimiento *</label>
+            <select id="cita-procedimiento" formControlName="idProcedimiento">
+              <option value="" disabled>Selecciona procedimiento</option>
+              @for (p of procedimientos(); track p.id) {
+                <option [value]="p.id">{{ p.nombre }} · S/ {{ p.precio | number:'1.2-2' }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="observaciones-cita">Observaciones</label>
+            <input id="observaciones-cita" formControlName="observacionesDetalle" maxlength="500" />
+          </div>
+          <button
+            class="button-secondary"
+            type="button"
+            (click)="agregarProcedimiento()"
+            [disabled]="procedimientos().length === 0">
+            Añadir al detalle
+          </button>
         </div>
         @if (detalles().length > 0) {
-          <div class="table-wrap transaction-table"><table class="data-table"><thead><tr><th>Procedimiento</th><th>Observaciones</th><th class="actions-cell">Acción</th></tr></thead><tbody>@for (detalle of detalles(); track detalle.idProcedimiento) { <tr><td class="name-cell">{{ detalle.nombreProcedimiento }}</td><td>{{ detalle.observaciones || '—' }}</td><td class="actions-cell"><button class="button-danger" type="button" (click)="quitarProcedimiento(detalle.idProcedimiento)">Quitar</button></td></tr> }</tbody></table></div>
-        } @else { <p class="transaction-empty">El detalle de la cita está vacío.</p> }
+          <div class="table-wrap transaction-table">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Procedimiento</th>
+                  <th>Observaciones</th>
+                  <th class="actions-cell">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (detalle of detalles(); track detalle.idProcedimiento) {
+                  <tr>
+                    <td class="name-cell">{{ detalle.nombreProcedimiento }}</td>
+                    <td>{{ detalle.observaciones || '—' }}</td>
+                    <td class="actions-cell">
+                      <button
+                        class="button-danger"
+                        type="button"
+                        (click)="quitarProcedimiento(detalle.idProcedimiento)">
+                        Quitar
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="transaction-empty">El detalle de la cita está vacío.</p>
+        }
       </section>
     </div>
     <aside class="transaction-summary">
       <p class="summary-kicker">Resumen</p>
-      <div class="summary-value"><span>Paciente</span><strong>{{ pacienteSeleccionado() }}</strong></div>
-      <div class="summary-value"><span>Fecha</span><strong>{{ form.controls.fechaHora.value || 'Pendiente' }}</strong></div>
-      <div class="summary-total"><span>Procedimientos</span><strong>{{ detalles().length }}</strong></div>
-      <button class="button" type="submit" [disabled]="loading() || detalles().length === 0">{{ loading() ? 'Guardando...' : (editingId() ? 'Guardar cambios' : 'Confirmar cita') }}</button>
+      <div class="summary-value">
+        <span>Paciente</span>
+        <strong>{{ pacienteSeleccionado() }}</strong>
+      </div>
+      <div class="summary-value">
+        <span>Fecha</span>
+        <strong>{{ form.controls.fechaHora.value || 'Pendiente' }}</strong>
+      </div>
+      <div class="summary-total">
+        <span>Procedimientos</span>
+        <strong>{{ detalles().length }}</strong>
+      </div>
+      <button
+        class="button"
+        type="submit"
+        [disabled]="loading() || detalles().length === 0">
+        {{ loading() ? 'Guardando...' : (editingId() ? 'Guardar cambios' : 'Confirmar cita') }}
+      </button>
     </aside>
   </form>
 </section>
-<section class="transaction-history"><div class="plans-heading"><div><p class="eyebrow">Agenda</p><h2 class="section-heading">Citas registradas</h2></div><div class="appointment-filter"><label for="filtro-paciente-citas">Filtrar por paciente</label><select id="filtro-paciente-citas" [value]="filtroPacienteId() ?? ''" (change)="filtrarPorPaciente($event)"><option value="">Todos los pacientes</option>@for (p of pacientes(); track p.id) { <option [value]="p.id">{{ p.apellidos }}, {{ p.nombres }} · {{ p.dni }}</option> }</select><span class="plan-count">{{ items().length }} citas</span></div></div><div class="table-wrap"><table class="data-table">
-  <thead><tr><th>Cita</th><th>Paciente</th><th>Fecha y hora</th><th>Procedimientos</th><th>Estado</th><th class="actions-cell">Acciones</th></tr></thead>
-  <tbody>@if (loading() && items().length === 0) { <tr><td colspan="6" class="loading-row">Cargando citas...</td></tr> }
-    @for (item of items(); track item.id) { <tr><td class="name-cell">#{{ item.id }}</td><td>{{ nombrePaciente(item.idPaciente) }}</td><td>{{ item.fechaHora | date:'dd/MM/yyyy HH:mm' }}</td><td>@for (detalle of item.detalles; track detalle.id) { <span class="list-line">{{ detalle.motivoConsulta }}</span> }</td><td><span class="status-badge">{{ item.estado }}</span></td><td class="actions-cell">@if (item.estado === 'PROGRAMADA') { <button class="text-link" type="button" (click)="editar(item)">Editar</button><button class="button-danger" type="button" (click)="cancelarCita(item)">Cancelar</button> }</td></tr> }
-    @empty { @if (!loading()) { <tr><td colspan="6" class="empty-cell">No hay citas programadas.</td></tr> } }
-  </tbody>
-</table></div></section>
+
+<!-- SECCIÓN DE AGENDA / HISTORIAL CON ALTERNADOR DE VISTA -->
+<section class="transaction-history" aria-labelledby="section-agenda-title">
+  <!-- Barra superior con Switch [ Ver Tabla | Ver Calendario ] y Filtros -->
+  <div class="view-toggle-bar">
+    <div class="view-toggle-left">
+      <div>
+        <p class="eyebrow">Agenda de citas</p>
+        <h2 id="section-agenda-title" class="section-heading" style="margin: 0; font-size: 18px;">
+          {{ vista() === 'calendario' ? 'Agenda visual' : 'Listado de citas' }}
+        </h2>
+      </div>
+
+      <!-- Switch de alternancia de vista -->
+      <div class="view-toggle-group" role="group" aria-label="Selector de vista de citas">
+        <button
+          type="button"
+          id="btn-ver-tabla"
+          class="view-toggle-btn"
+          [class.active]="vista() === 'tabla'"
+          (click)="cambiarVista('tabla')">
+          <svg class="toggle-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z" clip-rule="evenodd" />
+          </svg>
+          Ver Tabla
+        </button>
+        <button
+          type="button"
+          id="btn-ver-calendario"
+          class="view-toggle-btn"
+          [class.active]="vista() === 'calendario'"
+          (click)="cambiarVista('calendario')">
+          <svg class="toggle-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd" />
+          </svg>
+          Ver Calendario
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtro por paciente -->
+    <div class="appointment-filter">
+      <label for="filtro-paciente-citas">Filtrar por paciente</label>
+      <select
+        id="filtro-paciente-citas"
+        [value]="filtroPacienteId() ?? ''"
+        (change)="filtrarPorPaciente($event)">
+        <option value="">Todos los pacientes</option>
+        @for (p of pacientes(); track p.id) {
+          <option [value]="p.id">{{ p.apellidos }}, {{ p.nombres }} · {{ p.dni }}</option>
+        }
+      </select>
+      <span class="plan-count">{{ items().length }} citas</span>
+    </div>
+  </div>
+
+  <!-- VISTA 1: TABLA TRADICIONAL -->
+  @if (vista() === 'tabla') {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Cita</th>
+            <th>Paciente</th>
+            <th>Odontólogo</th>
+            <th>Fecha y hora</th>
+            <th>Procedimientos</th>
+            <th>Estado</th>
+            <th class="actions-cell">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading() && items().length === 0) {
+            <tr>
+              <td colspan="7" class="loading-row">Cargando citas...</td>
+            </tr>
+          }
+          @for (item of items(); track item.id) {
+            <tr>
+              <td class="name-cell">#{{ item.id }}</td>
+              <td>{{ nombrePaciente(item.idPaciente) }}</td>
+              <td>
+                <strong>{{ nombreOdontologo(item) }}</strong>
+                <br /><small style="color: var(--muted)">{{ especialidadOdontologo(item) }}</small>
+              </td>
+              <td>{{ item.fechaHora | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                @for (detalle of item.detalles; track detalle.id) {
+                  <span class="list-line">{{ detalle.motivoConsulta }}</span>
+                }
+              </td>
+              <td>
+                <span class="status-badge" [attr.data-status]="item.estado">{{ item.estado }}</span>
+              </td>
+              <td class="actions-cell">
+                @if (item.estado === 'PROGRAMADA') {
+                  <button class="text-link" type="button" (click)="editar(item)">Editar</button>
+                  <button class="button-danger" type="button" (click)="cancelarCita(item)">Cancelar</button>
+                }
+              </td>
+            </tr>
+          }
+          @empty {
+            @if (!loading()) {
+              <tr>
+                <td colspan="7" class="empty-cell">No hay citas programadas.</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- VISTA 2: CALENDARIO / AGENDA VISUAL MODERNA -->
+  @if (vista() === 'calendario') {
+    <!-- Barra de control y navegación de fechas -->
+    <div class="calendar-controls-card">
+      <div class="calendar-header-nav">
+        <!-- Botones de navegación temporal -->
+        <div class="calendar-nav-actions">
+          <button
+            type="button"
+            class="calendar-nav-btn"
+            (click)="navegarAnterior()"
+            title="Período anterior">
+            ◀ Anterior
+          </button>
+          <button
+            type="button"
+            class="calendar-nav-btn today-btn"
+            (click)="irAHoy()"
+            title="Ir al día de hoy">
+            Hoy
+          </button>
+          <button
+            type="button"
+            class="calendar-nav-btn"
+            (click)="navegarSiguiente()"
+            title="Período siguiente">
+            Siguiente ▶
+          </button>
+        </div>
+
+        <!-- Título del período actual -->
+        <div class="calendar-period-info">
+          <h3 class="calendar-period-title">{{ tituloPeriodo() }}</h3>
+        </div>
+
+        <!-- Alternador Semanal / Mensual y Salto por Fecha -->
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div class="calendar-mode-switch" role="group" aria-label="Modo de calendario">
+            <button
+              type="button"
+              class="calendar-mode-btn"
+              [class.active]="modoCalendario() === 'semana'"
+              (click)="cambiarModoCalendario('semana')">
+              Semanal
+            </button>
+            <button
+              type="button"
+              class="calendar-mode-btn"
+              [class.active]="modoCalendario() === 'mes'"
+              (click)="cambiarModoCalendario('mes')">
+              Mensual
+            </button>
+          </div>
+
+          <div class="calendar-date-jump">
+            <label for="jump-calendar-date">Ir a:</label>
+            <input
+              id="jump-calendar-date"
+              type="date"
+              class="calendar-date-input"
+              [value]="fechaInputVal()"
+              (change)="alCambiarFechaInput($event)"
+              title="Seleccionar fecha específica" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen estadístico del período -->
+      <div class="calendar-metrics-bar">
+        <div class="calendar-metrics-chips">
+          <span class="calendar-metric-chip total">
+            {{ citasEnPeriodo() }} Citas en pantalla
+          </span>
+          <span class="calendar-metric-chip programadas">
+            {{ citasProgramadasEnPeriodo() }} Programadas
+          </span>
+          <span class="calendar-metric-chip atendidas">
+            {{ citasAtendidasEnPeriodo() }} Atendidas
+          </span>
+          <span class="calendar-metric-chip canceladas">
+            {{ citasCanceladasEnPeriodo() }} Canceladas
+          </span>
+        </div>
+
+        @if (citasEnPeriodo() === 0 && fechaConCitasMasCercana()) {
+          <button
+            type="button"
+            class="calendar-jump-hint-btn"
+            (click)="irAProximaCita()">
+            📅 Ir a fecha con citas próximas ({{ fechaConCitasMasCercana() | date:'dd/MM/yyyy' }})
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- MODALIDAD 1: VISTA SEMANAL (7 DÍAS CON HORARIOS Y TARJETAS MÉDICAS) -->
+    @if (modoCalendario() === 'semana') {
+      <div class="week-grid-container">
+        <div class="week-grid">
+          @for (dia of diasSemana(); track dia.fechaStr) {
+            <div class="day-column" [class.is-today]="dia.esHoy">
+              <!-- Cabecera del día -->
+              <header class="day-column-header">
+                <div class="day-title-wrap">
+                  <span class="day-name">{{ dia.nombreDia }}</span>
+                  <span class="day-date-number">{{ dia.numeroDia }} {{ dia.nombreMesCorto }}</span>
+                </div>
+                <div class="day-badges-wrap">
+                  @if (dia.esHoy) {
+                    <span class="today-pill">HOY</span>
+                  }
+                  <span class="day-count-badge" [class.has-citas]="dia.citas.length > 0">
+                    {{ dia.citas.length }}
+                  </span>
+                </div>
+              </header>
+
+              <!-- Lista de citas del día -->
+              <div class="day-appointments-list">
+                @for (item of dia.citas; track item.id) {
+                  <article class="cita-card" [attr.data-status]="item.estado">
+                    <!-- Hora de inicio y Badge de estado -->
+                    <div class="cita-card-top">
+                      <span class="cita-time-badge">
+                        <svg class="cita-time-icon" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+                        </svg>
+                        {{ horaInicio(item.fechaHora) }}
+                      </span>
+                      <span class="status-badge" [attr.data-status]="item.estado">{{ item.estado }}</span>
+                    </div>
+
+                    <!-- Datos del Paciente y Odontólogo -->
+                    <div class="cita-card-body">
+                      <!-- Paciente -->
+                      <div class="cita-patient-row">
+                        <svg class="cita-person-icon" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
+                        </svg>
+                        <strong class="cita-patient-name">{{ nombrePaciente(item.idPaciente) }}</strong>
+                      </div>
+
+                      <!-- Odontólogo -->
+                      <div class="cita-doctor-row">
+                        <svg class="cita-doctor-icon" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M9.664 1.319a.75.75 0 01.672 0 41.059 41.059 0 018.198 5.424.75.75 0 01-.254 1.285 31.372 31.372 0 00-7.86 3.83.75.75 0 01-.84 0 31.508 31.508 0 00-2.08-1.287V9.3a1.5 1.5 0 10-1.5 0v1.042c-.687.35-1.35.733-1.986 1.149a.75.75 0 01-.84 0A31.372 31.372 0 001.72 7.028a.75.75 0 01-.254-1.285 41.059 41.059 0 018.198-5.424zM8.5 7.25a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75z" clip-rule="evenodd" />
+                          <path d="M10 12.378a32.96 32.96 0 014.248-.992c.366 2.87-.272 5.56-1.554 7.643a.75.75 0 01-1.282-.782c1.085-1.764 1.63-4.04 1.35-6.425a31.47 31.47 0 00-2.762.646.75.75 0 01-.39 0 31.47 31.47 0 00-2.762-.646c-.28 2.385.265 4.661 1.35 6.425a.75.75 0 01-1.282.782c-1.282-2.083-1.92-4.773-1.554-7.643.916.27 1.84.516 2.766.736.315.075.642.075.956 0 .378-.09.754-.188 1.128-.292z" />
+                        </svg>
+                        <div class="cita-doctor-info">
+                          <span class="cita-doctor-name">{{ nombreOdontologo(item) }}</span>
+                          <span class="cita-doctor-spec">{{ especialidadOdontologo(item) }}</span>
+                        </div>
+                      </div>
+
+                      <!-- Procedimientos solicitados -->
+                      @if (item.detalles && item.detalles.length > 0) {
+                        <div class="cita-procedures-list">
+                          @for (d of item.detalles; track d.id) {
+                            <span class="cita-procedure-pill">{{ d.motivoConsulta }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Acciones rápidas (si está PROGRAMADA) -->
+                    @if (item.estado === 'PROGRAMADA') {
+                      <div class="cita-card-actions">
+                        <button
+                          type="button"
+                          class="cita-card-btn edit"
+                          (click)="editar(item)"
+                          title="Editar esta cita">
+                          ✏️ Editar
+                        </button>
+                        <button
+                          type="button"
+                          class="cita-card-btn cancel"
+                          (click)="cancelarCita(item)"
+                          title="Cancelar esta cita">
+                          ✕ Cancelar
+                        </button>
+                      </div>
+                    }
+                  </article>
+                }
+                @empty {
+                  <div class="day-empty-state">
+                    <svg class="day-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="day-empty-text">Sin citas agendadas</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- MODALIDAD 2: VISTA MENSUAL (CALENDARIO DE 42 CASILLAS) -->
+    @if (modoCalendario() === 'mes') {
+      <div class="month-calendar-view">
+        <!-- Fila de nombres de días -->
+        <div class="month-weekdays-row">
+          <div class="month-weekday-label">Lun</div>
+          <div class="month-weekday-label">Mar</div>
+          <div class="month-weekday-label">Mié</div>
+          <div class="month-weekday-label">Jue</div>
+          <div class="month-weekday-label">Vie</div>
+          <div class="month-weekday-label">Sáb</div>
+          <div class="month-weekday-label">Dom</div>
+        </div>
+
+        <!-- Grilla de casillas -->
+        <div class="month-days-grid">
+          @for (dia of diasMes(); track dia.fechaStr) {
+            <div
+              class="month-day-cell"
+              [class.other-month]="!dia.esMesActual"
+              [class.is-today]="dia.esHoy"
+              (click)="seleccionarDiaMes(dia.fecha)"
+              title="Click para ver la agenda semanal de esta fecha">
+              <div class="month-day-header">
+                <span class="month-day-number">{{ dia.numeroDia }}</span>
+                @if (dia.citas.length > 0) {
+                  <span class="day-count-badge has-citas">{{ dia.citas.length }}</span>
+                }
+              </div>
+              <div class="month-day-citas">
+                @for (item of dia.citas; track item.id) {
+                  <div
+                    class="month-cita-chip"
+                    [attr.data-status]="item.estado"
+                    [title]="item.fechaHora + ' · ' + nombrePaciente(item.idPaciente) + ' · ' + nombreOdontologo(item)">
+                    <span class="month-cita-time">{{ horaInicio(item.fechaHora) }}</span>
+                    <span class="month-cita-patient">{{ nombrePaciente(item.idPaciente) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</section>

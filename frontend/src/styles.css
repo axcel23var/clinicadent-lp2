@@ -1063,3 +1063,677 @@ p {
 	box-shadow: 0 4px 10px rgba(13, 148, 136, 0.35);
 }
 
+/* ==========================================================================
+   VISTA DE CALENDARIO / AGENDA PARA CITAS CLÍNICAS (NATIVO CSS GRID)
+   ========================================================================== */
+
+/* Alternador de vista [ Ver Tabla | Ver Calendario ] */
+.view-toggle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+}
+
+.view-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.view-toggle-btn:hover:not(.active) {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.view-toggle-btn.active {
+  color: #0f766e;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.view-toggle-btn .toggle-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.view-toggle-btn.active .toggle-icon {
+  color: #0d9488;
+  transform: scale(1.1);
+}
+
+/* Panel de control y navegación */
+.calendar-controls-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.calendar-header-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.calendar-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calendar-nav-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.calendar-nav-btn.today-btn {
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.calendar-nav-btn.today-btn:hover {
+  background: #ccfbf1;
+  border-color: #5eead4;
+}
+
+.calendar-period-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-period-title {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.calendar-mode-switch {
+  display: inline-flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.calendar-mode-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calendar-mode-btn.active {
+  background: #ffffff;
+  color: #0d9488;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-date-jump {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.calendar-date-input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #0f172a;
+  background: #ffffff;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.calendar-date-input:focus {
+  outline: none;
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+}
+
+/* Métricas del período */
+.calendar-metrics-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.calendar-metrics-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.calendar-metric-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.calendar-metric-chip.total { background: #f8fafc; color: #334155; border: 1px solid #e2e8f0; }
+.calendar-metric-chip.programadas { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+.calendar-metric-chip.atendidas { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.calendar-metric-chip.canceladas { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+.calendar-jump-hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0d9488;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: 7px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calendar-jump-hint-btn:hover {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+/* Grilla Semanal (7 días nativo CSS Grid) */
+.week-grid-container {
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(210px, 1fr));
+  gap: 14px;
+  min-width: 1100px;
+  align-items: start;
+}
+
+.day-column {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  min-height: 440px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.day-column:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.day-column.is-today {
+  border: 2px solid #14b8a6;
+  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.12);
+}
+
+.day-column-header {
+  padding: 12px 14px;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.day-column.is-today .day-column-header {
+  background: linear-gradient(180deg, #f0fdfa 0%, #e6fffa 100%);
+  border-bottom: 1px solid #99f6e4;
+}
+
+.day-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.day-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+}
+
+.day-column.is-today .day-name { color: #0d9488; }
+
+.day-date-number {
+  font-family: 'Manrope', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.day-badges-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.today-pill {
+  background: #14b8a6;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+}
+
+.day-count-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  background: #e2e8f0;
+  color: #475569;
+  border-radius: 999px;
+}
+
+.day-count-badge.has-citas {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.day-appointments-list {
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.day-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 12px;
+  color: #94a3b8;
+  gap: 8px;
+  flex: 1;
+}
+
+.day-empty-icon {
+  width: 26px;
+  height: 26px;
+  opacity: 0.45;
+}
+
+.day-empty-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Tarjeta médica estilizada (cita-card) */
+.cita-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #94a3b8;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.cita-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -2px rgba(15, 23, 42, 0.08);
+  border-color: #cbd5e1;
+}
+
+.cita-card[data-status="PROGRAMADA"] {
+  border-left-color: #0284c7;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+}
+
+.cita-card[data-status="ATENDIDA"] {
+  border-left-color: #10b981;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.cita-card[data-status="CANCELADA"] {
+  border-left-color: #ef4444;
+  background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
+  opacity: 0.85;
+}
+
+.cita-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cita-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 6px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+}
+
+.cita-card[data-status="PROGRAMADA"] .cita-time-badge { background: #0284c7; }
+.cita-card[data-status="ATENDIDA"] .cita-time-badge { background: #059669; }
+.cita-card[data-status="CANCELADA"] .cita-time-badge { background: #dc2626; }
+.cita-time-icon { width: 12px; height: 12px; }
+
+.cita-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cita-patient-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.cita-person-icon {
+  width: 14px;
+  height: 14px;
+  color: #0d9488;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cita-patient-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.cita-doctor-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 4px 7px;
+  background: rgba(241, 245, 249, 0.7);
+  border-radius: 6px;
+}
+
+.cita-doctor-icon {
+  width: 14px;
+  height: 14px;
+  color: #0284c7;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cita-doctor-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cita-doctor-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.cita-doctor-spec {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.cita-procedures-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cita-procedure-pill {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.cita-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cita-card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.cita-card-btn.edit {
+  background: #f0fdfa;
+  border-color: #99f6e4;
+  color: #0f766e;
+}
+
+.cita-card-btn.edit:hover { background: #ccfbf1; border-color: #5eead4; }
+
+.cita-card-btn.cancel {
+  background: #fef2f2;
+  border-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.cita-card-btn.cancel:hover { background: #fee2e2; border-color: #fca5a5; }
+
+/* Grilla Mensual */
+.month-calendar-view {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.month-weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.month-weekday-label {
+  padding: 10px 8px;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.month-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #e2e8f0;
+}
+
+.month-day-cell {
+  background: #ffffff;
+  min-height: 105px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.month-day-cell:hover { background: #fafafa; }
+.month-day-cell.other-month { background: #f8fafc; opacity: 0.55; }
+.month-day-cell.is-today { background: #f0fdfa; }
+
+.month-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.month-day-number {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.month-day-cell.is-today .month-day-number { color: #0d9488; font-weight: 800; }
+
+.month-day-citas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  max-height: 110px;
+}
+
+.month-cita-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #1e293b;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+
+.month-cita-chip:hover { border-color: #cbd5e1; transform: translateX(2px); }
+.month-cita-chip[data-status="PROGRAMADA"] { border-left: 3px solid #0284c7; background: #f0f9ff; }
+.month-cita-chip[data-status="ATENDIDA"] { border-left: 3px solid #10b981; background: #ecfdf5; }
+.month-cita-chip[data-status="CANCELADA"] { border-left: 3px solid #ef4444; background: #fef2f2; opacity: 0.75; }
+.month-cita-time { font-weight: 700; color: #0f172a; }
+.month-cita-patient { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+
+@media (max-width: 900px) {
+  .view-toggle-bar, .calendar-header-nav { flex-direction: column; align-items: stretch; }
+  .view-toggle-left, .calendar-period-info, .calendar-nav-actions { justify-content: center; }
+}
+
