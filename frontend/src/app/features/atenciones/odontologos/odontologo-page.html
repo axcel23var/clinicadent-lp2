@@ -8,7 +8,18 @@
       <div class="field"><label for="cop">COP *</label><input id="cop" formControlName="cop" maxlength="20" /></div>
       <div class="field"><label for="odo-nombres">Nombres *</label><input id="odo-nombres" formControlName="nombres" maxlength="80" /></div>
       <div class="field"><label for="odo-apellidos">Apellidos *</label><input id="odo-apellidos" formControlName="apellidos" maxlength="80" /></div>
-      <div class="field"><label for="odo-especialidad">Especialidad *</label><input id="odo-especialidad" formControlName="especialidad" maxlength="100" /></div>
+      <div class="field">
+        <label for="odo-especialidad">Especialidad *</label>
+        <select id="odo-especialidad" formControlName="especialidad">
+          <option value="" disabled selected>Seleccione una especialidad</option>
+          @for (esp of especialidades(); track esp.id) {
+            <option [value]="esp.nombre">{{ esp.nombre }}</option>
+          }
+          @if (form.controls.especialidad.value && !tieneEspecialidad(form.controls.especialidad.value)) {
+            <option [value]="form.controls.especialidad.value">{{ form.controls.especialidad.value }}</option>
+          }
+        </select>
+      </div>
     </div>
     <div class="form-actions"><button class="button" type="submit" [disabled]="loading()">{{ loading() ? 'Guardando...' : (editingId() ? 'Guardar cambios' : 'Registrar odontólogo') }}</button>@if (editingId()) { <button class="button-secondary" type="button" (click)="cancelarEdicion()">Cancelar edición</button> }</div>
   </form>
