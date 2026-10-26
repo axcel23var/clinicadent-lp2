@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Base BomERP U1 - API Console</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar"><div><p class="eyebrow">Producto U1 - LP2</p><h1>Consola API - Ventas</h1><p>Simulación del backend REST heredado del sistema MVC de Ciclo 3.</p></div></header>
+  <main class="layout">
+    <section class="panel">
+      <h2>1. POST /api/ventas</h2>
+      <form id="ventaForm" novalidate>
+        <label>Cliente <input id="cliente" value="María Quispe"></label>
+        <label>
+          Producto
+          <select id="producto">
+            <option value="Pack escolar" data-precio="45">Pack escolar</option>
+            <option value="Caja de lapiceros" data-precio="18.5">Caja de lapiceros</option>
+            <option value="Mochila urbana" data-precio="89.9">Mochila urbana</option>
+          </select>
+        </label>
+        <label>Cantidad <input id="cantidad" type="number" min="1" value="2"></label>
+        <button type="submit">Registrar venta</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>2. GET /api/ventas</h2>
+      <label>Estado <select id="filtroEstado"><option value="TODAS">TODAS</option><option value="ACTIVA">ACTIVA</option><option value="ANULADA">ANULADA</option></select></label>
+      <div class="actions">
+        <button id="getVentasBtn" type="button">Consultar</button>
+        <button id="seedBtn" type="button" class="secondary">Cargar datos</button>
+        <button id="clearBtn" type="button" class="danger">Limpiar</button>
+      </div>
+    </section>
+
+    <section class="panel wide"><h2>Respuesta API</h2><pre id="responseBox">{}</pre></section>
+    <section class="panel wide">
+      <h2>Ventas persistidas</h2>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Cliente</th><th>Detalles</th><th>Total</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="ventasBody"></tbody></table></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

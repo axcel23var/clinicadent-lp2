@@ -1,0 +1,61 @@
+<div class="page-heading-row">
+  <div>
+    <p class="eyebrow">Catálogo clínico</p>
+    <h1 class="page-title">Especialidades</h1>
+    <p class="page-subtitle">Administra las áreas de atención de la clínica.</p>
+  </div>
+  @if (auth.hasAnyRole('ADMINISTRADOR')) {
+    <a class="button" routerLink="/catalogo/especialidades/nueva">
+      <span aria-hidden="true">+</span> Nueva especialidad
+    </a>
+  }
+</div>
+
+@if (error()) {
+  <p class="error-message" role="alert">{{ error() }}</p>
+}
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th scope="col">Especialidad</th>
+        <th scope="col">Descripción</th>
+        @if (auth.hasAnyRole('ADMINISTRADOR')) {
+          <th scope="col" class="actions-cell">Acciones</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading() && especialidades().length === 0) {
+        <tr><td class="loading-row" colspan="3">Cargando especialidades...</td></tr>
+      } @else {
+        @for (especialidad of especialidades(); track especialidad.id) {
+          <tr>
+            <td class="name-cell">{{ especialidad.nombre }}</td>
+            <td class="description-cell">{{ especialidad.descripcion || 'Sin descripción' }}</td>
+            @if (auth.hasAnyRole('ADMINISTRADOR')) {
+              <td class="actions-cell">
+                <a
+                  class="text-link"
+                  [routerLink]="['/catalogo/especialidades', especialidad.id, 'editar']"
+                  [attr.aria-label]="'Editar ' + especialidad.nombre"
+                >Editar</a>
+                <button
+                  class="button-danger"
+                  type="button"
+                  [disabled]="deletingId() === especialidad.id"
+                  (click)="eliminar(especialidad)"
+                >
+                  {{ deletingId() === especialidad.id ? 'Eliminando...' : 'Eliminar' }}
+                </button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr><td class="empty-cell" colspan="3">No hay especialidades registradas.</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

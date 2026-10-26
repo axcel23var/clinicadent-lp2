@@ -1,0 +1,54 @@
+<div>
+  <p class="eyebrow">Catálogo clínico</p>
+  <h1 class="page-title">{{ editando() ? 'Editar especialidad' : 'Nueva especialidad' }}</h1>
+  <p class="page-subtitle">
+    {{ editando() ? 'Actualiza los datos del área de atención.' : 'Completa los datos para agregar un área de atención.' }}
+  </p>
+</div>
+
+@if (error()) {
+  <p class="error-message" role="alert">{{ error() }}</p>
+}
+
+<section class="form-panel">
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="field">
+      <label for="nombre">Nombre <span aria-hidden="true">*</span></label>
+      <input
+        id="nombre"
+        type="text"
+        formControlName="nombre"
+        maxlength="100"
+        autocomplete="off"
+        required
+        [attr.aria-invalid]="form.controls.nombre.touched && form.controls.nombre.invalid"
+        aria-describedby="nombre-help nombre-error"
+      />
+      <p class="field-hint" id="nombre-help">Hasta 100 caracteres.</p>
+      @if (mensajeValidacion('nombre'); as mensaje) {
+        <p class="validation-message" id="nombre-error">{{ mensaje }}</p>
+      }
+    </div>
+
+    <div class="field">
+      <label for="descripcion">Descripción</label>
+      <textarea
+        id="descripcion"
+        formControlName="descripcion"
+        maxlength="200"
+        aria-describedby="descripcion-help descripcion-error"
+      ></textarea>
+      <p class="field-hint" id="descripcion-help">Opcional, hasta 200 caracteres.</p>
+      @if (mensajeValidacion('descripcion'); as mensaje) {
+        <p class="validation-message" id="descripcion-error">{{ mensaje }}</p>
+      }
+    </div>
+
+    <div class="form-actions">
+      <button class="button" type="submit" [disabled]="loading() || errorCarga()">
+        {{ loading() ? 'Guardando...' : 'Guardar especialidad' }}
+      </button>
+      <button class="button-secondary" type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+</section>

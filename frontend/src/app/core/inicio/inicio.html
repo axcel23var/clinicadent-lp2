@@ -1,0 +1,91 @@
+<header class="dashboard-heading">
+  <div>
+    <p class="eyebrow">ClínicaDent · Centro de operaciones</p>
+    <h1 class="page-title">Panel diario</h1>
+    <p class="dashboard-date">{{ fechaActual() }}</p>
+  </div>
+  <a class="button" routerLink="/citas">Programar cita <span aria-hidden="true">+</span></a>
+</header>
+
+@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
+
+<section class="dashboard-metrics" aria-label="Indicadores de la clínica">
+  @if (canViewAdmission()) {
+  <article class="dashboard-metric metric-highlight">
+    <span class="metric-label">Citas de hoy</span>
+    <strong>{{ loading() ? '—' : citasDeHoy().length }}</strong>
+    <a routerLink="/citas">Abrir agenda <span aria-hidden="true">→</span></a>
+  </article>
+  <article class="dashboard-metric">
+    <span class="metric-label">Pacientes</span>
+    <strong>{{ loading() ? '—' : pacientes().length }}</strong>
+    <a routerLink="/pacientes">Ver admisión <span aria-hidden="true">→</span></a>
+  </article>
+  }
+  @if (canViewTreatments()) {
+  <article class="dashboard-metric">
+    <span class="metric-label">Planes activos</span>
+    <strong>{{ loading() ? '—' : planesActivos() }}</strong>
+    <a routerLink="/tratamientos">Ver tratamientos <span aria-hidden="true">→</span></a>
+  </article>
+  }
+  @if (canViewPayments()) {
+  <article class="dashboard-metric metric-balance">
+    <span class="metric-label">Saldo por cobrar</span>
+    <strong>{{ loading() ? '—' : (saldoPorCobrar() | currency:'PEN':'symbol':'1.2-2') }}</strong>
+    <a routerLink="/pagos">Ir a caja <span aria-hidden="true">→</span></a>
+  </article>
+  }
+</section>
+
+<section class="dashboard-workspace" [class.single-column]="!canViewAdmission()">
+  @if (canViewAdmission()) {
+  <div class="dashboard-agenda">
+    <div class="dashboard-section-heading">
+      <div><p class="eyebrow">Agenda</p><h2>Citas de hoy</h2></div>
+      <a class="text-link" routerLink="/citas">Ver agenda completa</a>
+    </div>
+    @if (loading()) {
+      <div class="dashboard-empty">Cargando agenda…</div>
+    } @else if (citasDeHoy().length > 0) {
+      <div class="agenda-list">
+        @for (cita of citasDeHoy(); track cita.id) {
+          <a class="agenda-row" routerLink="/citas">
+            <time>{{ cita.fechaHora | date:'HH:mm' }}</time>
+            <span class="agenda-person"><strong>{{ nombrePaciente(cita.idPaciente) }}</strong><span>@for (detalle of cita.detalles; track detalle.id; let last = $last) { {{ detalle.motivoConsulta }}@if (!last) { · } }</span></span>
+            <span class="status-badge">{{ cita.estado }}</span>
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="dashboard-empty"><strong>Agenda despejada</strong><span>No hay citas programadas para hoy.</span><a routerLink="/citas">Programar una cita</a></div>
+    }
+  </div>
+  }
+
+  <aside class="dashboard-operations" aria-label="Flujos de trabajo">
+    <div class="dashboard-section-heading"><div><p class="eyebrow">Trabajo clínico</p><h2>Operaciones</h2></div></div>
+    @if (canViewTreatments()) {
+    <a class="operation-link" routerLink="/tratamientos"><span class="operation-index">01</span><span><strong>Plan de tratamiento</strong><small>Paciente + procedimientos + costo</small></span><span aria-hidden="true">→</span></a>
+    }
+    @if (canViewAttentions()) {
+    <a class="operation-link" routerLink="/atenciones"><span class="operation-index">02</span><span><strong>Atención clínica</strong><small>Cita + odontograma + procedimientos</small></span><span aria-hidden="true">→</span></a>
+    }
+    @if (canViewPayments()) {
+    <a class="operation-link" routerLink="/pagos"><span class="operation-index">03</span><span><strong>Registrar abono</strong><small>Tratamiento + medios de pago</small></span><span aria-hidden="true">→</span></a>
+    }
+    <div class="operations-foot">@if (canViewAttentions()) { <span>{{ loading() ? '—' : atenciones().length }}</span> atenciones } @if (canViewPayments()) { <span class="operations-divider">·</span> <span>{{ loading() ? '—' : pagos().length }}</span> pagos }
+    </div>
+  </aside>
+</section>
+
+@if (canViewCatalogs()) {
+<section class="dashboard-catalogs" aria-label="Configuración clínica">
+  <div class="dashboard-section-heading"><div><p class="eyebrow">Configuración</p><h2>Catálogos y equipo</h2></div></div>
+  <div class="catalog-links">
+    <a routerLink="/catalogo/especialidades"><span>Especialidades</span><strong>Administrar áreas clínicas →</strong></a>
+    <a routerLink="/catalogo/procedimientos"><span>Procedimientos</span><strong>Consultar tarifario →</strong></a>
+    <a routerLink="/odontologos"><span>Odontólogos</span><strong>Ver equipo clínico →</strong></a>
+  </div>
+</section>
+}

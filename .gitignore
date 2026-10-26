@@ -1,0 +1,34 @@
+# Root .gitignore for ClinicaDent
+
+# Node & Frontend
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+frontend/tmp/
+frontend/out-tsc/
+frontend/bazel-out/
+frontend/*.log
+**/node_modules/
+**/.angular/
+
+# Java & Maven
+CLINICADENT-backend/target/
+CLINICADENT-backend/.mvn/wrapper/maven-wrapper.jar
+CLINICADENT-backend/*.log
+**/target/
+hs_err_pid*
+replay_pid*
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db

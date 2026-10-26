@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>ClinicaDent | Gestión clínica</title>
+  <meta name="description" content="Panel de gestión de la clínica dental ClinicaDent.">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+  <script>
+    (function () {
+      function tagBadges() {
+        document.querySelectorAll('.status-badge').forEach(function (badge) {
+          var text = (badge.textContent || '').trim().toUpperCase();
+          if (text && badge.getAttribute('data-status') !== text) {
+            badge.setAttribute('data-status', text);
+          }
+        });
+      }
+      var obs = new MutationObserver(tagBadges);
+      obs.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+      window.addEventListener('DOMContentLoaded', tagBadges);
+    })();
+  </script>
+</body>
+</html>

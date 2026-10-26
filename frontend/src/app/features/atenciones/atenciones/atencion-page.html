@@ -1,0 +1,42 @@
+<div class="page-heading-row"><div><p class="eyebrow">Módulo 3 · Atenciones clínicas</p><h1 class="page-title">Registro de atención</h1><p class="page-subtitle">Atenciones clínicas · {{ items().length }} registros</p></div></div>
+@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
+@if (success()) { <p class="success-message" role="status">{{ success() }}</p> }
+<section class="transaction-card attention-workflow" aria-labelledby="attention-title">
+  <header class="transaction-head"><span class="transaction-mark">03</span><div><p class="eyebrow">Nueva operación clínica</p><h2 id="attention-title">Atender cita</h2></div></header>
+  <form class="transaction-layout" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="transaction-main">
+      <section class="transaction-section">
+        <div class="transaction-section-title"><span>1</span><div><h3>Cabecera clínica</h3><p>Cita, profesional y diagnóstico</p></div></div>
+        <div class="clinic-form-grid">
+          <div class="field"><label for="atencion-cita">Cita programada *</label><select id="atencion-cita" formControlName="idCita"><option value="" disabled>Selecciona una cita</option>@for (cita of citas(); track cita.id) { <option [value]="cita.id">Cita #{{ cita.id }} · {{ cita.fechaHora | date:'dd/MM/yyyy HH:mm' }} · {{ cita.detalles[0]?.motivoConsulta }}</option> }</select>@if (citas().length === 0) { <p class="field-hint">No hay citas programadas para atender.</p> }</div>
+          <div class="field"><label for="atencion-odontologo">Odontólogo *</label><select id="atencion-odontologo" formControlName="idOdontologo"><option value="" disabled>Selecciona un odontólogo</option>@for (odontologo of odontologos(); track odontologo.id) { <option [value]="odontologo.id">{{ odontologo.apellidos }}, {{ odontologo.nombres }} · COP {{ odontologo.cop }}</option> }</select></div>
+          <div class="field"><label for="diagnostico">Diagnóstico *</label><textarea id="diagnostico" formControlName="diagnostico" maxlength="500"></textarea></div>
+          <div class="field"><label for="nota-medica">Nota médica</label><textarea id="nota-medica" formControlName="notaMedica" maxlength="500"></textarea></div>
+        </div>
+      </section>
+      <section class="transaction-section">
+        <div class="transaction-section-title"><span>2</span><div><h3>Procedimientos realizados</h3><p>Detalle por pieza dental · {{ detalles().length }} ítems</p></div></div>
+        <div class="detail-entry-grid attention-entry-grid">
+          <div class="field"><label for="atencion-procedimiento">Procedimiento *</label><select id="atencion-procedimiento" formControlName="idProcedimiento"><option value="" disabled>Selecciona procedimiento</option>@for (procedimiento of procedimientos(); track procedimiento.id) { <option [value]="procedimiento.id">{{ procedimiento.nombre }} · S/ {{ procedimiento.precio | number:'1.2-2' }}</option> }</select></div>
+          <div class="field"><label for="pieza">Pieza dental (FDI) *</label><input id="pieza" formControlName="piezaDental" maxlength="10" placeholder="Ej. 16" /></div>
+          <div class="field"><label for="observacion-atencion">Observación</label><input id="observacion-atencion" formControlName="observacion" maxlength="255" /></div>
+          <button class="button-secondary" type="button" (click)="agregarDetalle()">Añadir al odontograma</button>
+        </div>
+        @if (detalles().length > 0) { <div class="table-wrap transaction-table"><table class="data-table"><thead><tr><th>Procedimiento</th><th>Pieza</th><th>Observación</th><th class="actions-cell">Acción</th></tr></thead><tbody>@for (detalle of detalles(); track $index; let index = $index) { <tr><td class="name-cell">{{ detalle.nombreProcedimiento }}</td><td>{{ detalle.piezaDental }}</td><td>{{ detalle.observacion || '—' }}</td><td class="actions-cell"><button class="button-danger" type="button" (click)="quitarDetalle(index)">Quitar</button></td></tr> }</tbody></table></div> } @else { <p class="transaction-empty">Aún no hay procedimientos asociados a esta atención.</p> }
+      </section>
+    </div>
+    <aside class="transaction-summary">
+      <p class="summary-kicker">Cierre de atención</p>
+      <div class="summary-value"><span>Procedimientos</span><strong>{{ detalles().length }}</strong></div>
+      <div class="summary-value"><span>Estado de cita al guardar</span><strong>ATENDIDA</strong></div>
+      <button class="button" type="submit" [disabled]="saving() || detalles().length === 0 || citas().length === 0 || odontologos().length === 0">{{ saving() ? 'Registrando...' : 'Registrar atención' }}</button>
+    </aside>
+  </form>
+</section>
+<section class="transaction-history"><div class="plans-heading"><div><p class="eyebrow">Historial clínico</p><h2 class="section-heading">Atenciones registradas</h2></div><span class="plan-count">{{ items().length }} atenciones</span></div><div class="table-wrap"><table class="data-table">
+  <thead><tr><th>Atención</th><th>Cita</th><th>Odontólogo</th><th>Fecha</th><th>Diagnóstico</th><th>Intervenciones</th></tr></thead>
+  <tbody>@if (loading() && items().length === 0) { <tr><td colspan="6" class="loading-row">Cargando atenciones...</td></tr> }
+    @for (item of items(); track item.id) { <tr><td class="name-cell">#{{ item.id }}</td><td>{{ pacienteDeCita(item.idCita) }}</td><td>{{ nombreOdontologo(item.idOdontologo) }}</td><td>{{ item.faAtencion | date:'dd/MM/yyyy HH:mm' }}</td><td>{{ item.diagnostico }}</td><td>@for (detalle of item.detalles; track detalle.id) { <span class="list-line">{{ detalle.piezaDental }} · {{ detalle.intervencion }}</span> }</td></tr> }
+    @empty { @if (!loading()) { <tr><td colspan="6" class="empty-cell">No hay atenciones registradas.</td></tr> } }
+  </tbody>
+</table></div></section>

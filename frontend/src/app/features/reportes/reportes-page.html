@@ -1,0 +1,52 @@
+<header class="page-heading-row">
+  <div>
+    <p class="eyebrow">Gestión y caja</p>
+    <h1 class="page-title">Reportes clínicos</h1>
+    <p class="page-subtitle">Actividad, procedimientos y recaudación por período.</p>
+  </div>
+</header>
+
+@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
+
+<section class="report-filter" aria-label="Período del reporte">
+  <div class="report-filter-title"><span class="report-index">01</span><div><h2>Período de consulta</h2><p>Selecciona las fechas que quieres comparar.</p></div></div>
+  <form [formGroup]="form" (ngSubmit)="consultar()">
+    <div class="field"><label for="reporte-desde">Desde</label><input id="reporte-desde" type="date" formControlName="desde" /></div>
+    <div class="field"><label for="reporte-hasta">Hasta</label><input id="reporte-hasta" type="date" formControlName="hasta" /></div>
+    <button class="button" type="submit" [disabled]="loading()">{{ loading() ? 'Generando...' : 'Actualizar reporte' }}</button>
+  </form>
+</section>
+
+@if (loading() && !reporte()) {
+  <p class="report-loading">Consultando operaciones…</p>
+} @else if (reporte(); as data) {
+  <section class="report-metrics" aria-label="Resumen del período">
+    <article class="report-metric"><span>Citas</span><strong>{{ data.totalCitas }}</strong><small>{{ data.citasProgramadas }} programadas · {{ data.citasAtendidas }} atendidas</small></article>
+    <article class="report-metric"><span>Atenciones</span><strong>{{ data.totalAtenciones }}</strong><small>{{ data.tratamientosActivos }} planes activos</small></article>
+    <article class="report-metric report-revenue"><span>Recaudación</span><strong>{{ data.totalRecaudado | currency:'PEN':'symbol':'1.2-2' }}</strong><small>{{ data.cantidadPagos }} recibos en el período</small></article>
+    <article class="report-metric"><span>Saldo pendiente</span><strong>{{ data.saldoPendienteActual | currency:'PEN':'symbol':'1.2-2' }}</strong><small>Saldo actual de los planes registrados</small></article>
+  </section>
+
+  <section class="report-grid">
+    <article class="report-panel report-chart-panel">
+      <header><div><p class="eyebrow">Caja</p><h2>Recaudación diaria</h2></div><span>{{ data.recaudacionDiaria.length }} días con pagos</span></header>
+      @if (data.recaudacionDiaria.length > 0) {
+        <div class="revenue-bars">@for (dia of data.recaudacionDiaria; track dia.fecha) { <div class="revenue-row"><time>{{ dia.fecha | date:'dd/MM' }}</time><div class="revenue-track"><span [style.width.%]="anchoBarra(dia.total)"></span></div><strong>{{ dia.total | currency:'PEN':'symbol':'1.0-0' }}</strong></div> }</div>
+      } @else { <p class="report-empty">No hubo pagos en este período.</p> }
+    </article>
+    <article class="report-panel">
+      <header><div><p class="eyebrow">Producción clínica</p><h2>Procedimientos realizados</h2></div></header>
+      @if (data.procedimientosMasRealizados.length > 0) { <ol class="report-ranking">@for (item of data.procedimientosMasRealizados; track item.procedimiento) { <li><span>{{ item.procedimiento }}</span><strong>{{ item.vecesRealizado }}</strong></li> }</ol> } @else { <p class="report-empty">No hay procedimientos atendidos en este período.</p> }
+    </article>
+    <article class="report-panel">
+      <header><div><p class="eyebrow">Recaudación</p><h2>Por método de pago</h2></div></header>
+      @if (data.recaudacionPorMetodo.length > 0) { <ul class="report-ranking">@for (item of data.recaudacionPorMetodo; track item.metodo) { <li><span>{{ item.metodo }}</span><strong>{{ item.total | currency:'PEN':'symbol':'1.2-2' }}</strong></li> }</ul> } @else { <p class="report-empty">No hay métodos con recaudación en este período.</p> }
+    </article>
+    <article class="report-panel report-status-panel">
+      <header><div><p class="eyebrow">Agenda</p><h2>Estado de citas</h2></div></header>
+      <div class="status-breakdown"><div><span class="status-dot status-scheduled"></span><span>Programadas</span><strong>{{ data.citasProgramadas }}</strong></div><div><span class="status-dot status-attended"></span><span>Atendidas</span><strong>{{ data.citasAtendidas }}</strong></div><div><span class="status-dot status-cancelled"></span><span>Canceladas</span><strong>{{ data.citasCanceladas }}</strong></div></div>
+    </article>
+  </section>
+} @else {
+  <p class="report-loading">Selecciona un período y genera el reporte.</p>
+}

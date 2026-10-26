@@ -1,0 +1,31 @@
+{
+  "realm": "clinicadent",
+  "enabled": true,
+  "displayName": "ClinicaDent",
+  "roles": {
+    "realm": [
+      { "name": "ADMINISTRADOR", "description": "Administracion completa del sistema" },
+      { "name": "RECEPCIONISTA", "description": "Gestion de pacientes y citas" },
+      { "name": "ODONTOLOGO", "description": "Gestion de tratamientos y atenciones clinicas" },
+      { "name": "CAJERO", "description": "Gestion de pagos" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "clinicadent-frontend",
+      "name": "ClinicaDent Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": ["http://localhost:4200/*"],
+      "webOrigins": ["http://localhost:4200"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*"
+      }
+    }
+  ]
+}

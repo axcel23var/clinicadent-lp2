@@ -1,0 +1,46 @@
+<div class="page-heading-row"><div><p class="eyebrow">Módulo 1 · Citas y admisión</p><h1 class="page-title">Agenda clínica</h1><p class="page-subtitle">Citas registradas · {{ items().length }}</p></div></div>
+@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
+@if (success()) { <p class="success-message" role="status">{{ success() }}</p> }
+<section class="transaction-card appointment-workflow" aria-labelledby="appointment-title">
+  <header class="transaction-head">
+    <span class="transaction-mark">01</span>
+    <div><p class="eyebrow">{{ editingId() ? 'Modificar agenda' : 'Nueva operación' }}</p><h2 id="appointment-title">{{ editingId() ? 'Editar cita' : 'Programar cita' }}</h2></div>
+    @if (editingId()) { <button class="text-link transaction-cancel" type="button" (click)="cancelarEdicion()">Cancelar edición</button> }
+  </header>
+  <form class="transaction-layout" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="transaction-main">
+      <section class="transaction-section">
+        <div class="transaction-section-title"><span>1</span><div><h3>Cabecera de cita</h3><p>Paciente y horario de atención</p></div></div>
+        <div class="clinic-form-grid">
+          <div class="field"><label for="cita-paciente">Paciente *</label><select id="cita-paciente" formControlName="idPaciente"><option value="" disabled>Selecciona paciente</option>@for (p of pacientes(); track p.id) { <option [value]="p.id">{{ p.apellidos }}, {{ p.nombres }} · {{ p.dni }}</option> }</select></div>
+          <div class="field"><label for="fecha-hora">Fecha y hora *</label><input id="fecha-hora" type="datetime-local" formControlName="fechaHora" /></div>
+        </div>
+      </section>
+      <section class="transaction-section">
+        <div class="transaction-section-title"><span>2</span><div><h3>Procedimientos solicitados</h3><p>Detalle de la cita · {{ detalles().length }} ítems</p></div></div>
+        <div class="detail-entry-grid">
+          <div class="field"><label for="cita-procedimiento">Procedimiento *</label><select id="cita-procedimiento" formControlName="idProcedimiento"><option value="" disabled>Selecciona procedimiento</option>@for (p of procedimientos(); track p.id) { <option [value]="p.id">{{ p.nombre }} · S/ {{ p.precio | number:'1.2-2' }}</option> }</select></div>
+          <div class="field"><label for="observaciones-cita">Observaciones</label><input id="observaciones-cita" formControlName="observacionesDetalle" maxlength="500" /></div>
+          <button class="button-secondary" type="button" (click)="agregarProcedimiento()" [disabled]="procedimientos().length === 0">Añadir al detalle</button>
+        </div>
+        @if (detalles().length > 0) {
+          <div class="table-wrap transaction-table"><table class="data-table"><thead><tr><th>Procedimiento</th><th>Observaciones</th><th class="actions-cell">Acción</th></tr></thead><tbody>@for (detalle of detalles(); track detalle.idProcedimiento) { <tr><td class="name-cell">{{ detalle.nombreProcedimiento }}</td><td>{{ detalle.observaciones || '—' }}</td><td class="actions-cell"><button class="button-danger" type="button" (click)="quitarProcedimiento(detalle.idProcedimiento)">Quitar</button></td></tr> }</tbody></table></div>
+        } @else { <p class="transaction-empty">El detalle de la cita está vacío.</p> }
+      </section>
+    </div>
+    <aside class="transaction-summary">
+      <p class="summary-kicker">Resumen</p>
+      <div class="summary-value"><span>Paciente</span><strong>{{ pacienteSeleccionado() }}</strong></div>
+      <div class="summary-value"><span>Fecha</span><strong>{{ form.controls.fechaHora.value || 'Pendiente' }}</strong></div>
+      <div class="summary-total"><span>Procedimientos</span><strong>{{ detalles().length }}</strong></div>
+      <button class="button" type="submit" [disabled]="loading() || detalles().length === 0">{{ loading() ? 'Guardando...' : (editingId() ? 'Guardar cambios' : 'Confirmar cita') }}</button>
+    </aside>
+  </form>
+</section>
+<section class="transaction-history"><div class="plans-heading"><div><p class="eyebrow">Agenda</p><h2 class="section-heading">Citas registradas</h2></div><div class="appointment-filter"><label for="filtro-paciente-citas">Filtrar por paciente</label><select id="filtro-paciente-citas" [value]="filtroPacienteId() ?? ''" (change)="filtrarPorPaciente($event)"><option value="">Todos los pacientes</option>@for (p of pacientes(); track p.id) { <option [value]="p.id">{{ p.apellidos }}, {{ p.nombres }} · {{ p.dni }}</option> }</select><span class="plan-count">{{ items().length }} citas</span></div></div><div class="table-wrap"><table class="data-table">
+  <thead><tr><th>Cita</th><th>Paciente</th><th>Fecha y hora</th><th>Procedimientos</th><th>Estado</th><th class="actions-cell">Acciones</th></tr></thead>
+  <tbody>@if (loading() && items().length === 0) { <tr><td colspan="6" class="loading-row">Cargando citas...</td></tr> }
+    @for (item of items(); track item.id) { <tr><td class="name-cell">#{{ item.id }}</td><td>{{ nombrePaciente(item.idPaciente) }}</td><td>{{ item.fechaHora | date:'dd/MM/yyyy HH:mm' }}</td><td>@for (detalle of item.detalles; track detalle.id) { <span class="list-line">{{ detalle.motivoConsulta }}</span> }</td><td><span class="status-badge">{{ item.estado }}</span></td><td class="actions-cell">@if (item.estado === 'PROGRAMADA') { <button class="text-link" type="button" (click)="editar(item)">Editar</button><button class="button-danger" type="button" (click)="cancelarCita(item)">Cancelar</button> }</td></tr> }
+    @empty { @if (!loading()) { <tr><td colspan="6" class="empty-cell">No hay citas programadas.</td></tr> } }
+  </tbody>
+</table></div></section>

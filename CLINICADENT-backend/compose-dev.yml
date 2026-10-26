@@ -1,0 +1,50 @@
+services:
+  keycloak-db:
+    image: postgres:17-alpine
+    container_name: clinicadent-keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: clinicadent_keycloak
+      POSTGRES_USER: clinicadent_keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-clinicadent-dev-only}
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clinicadent_keycloak -d clinicadent_keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    container_name: clinicadent-keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    ports:
+      - "38081:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin123}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/clinicadent_keycloak
+      KC_DB_USERNAME: clinicadent_keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-clinicadent-dev-only}
+    volumes:
+      - ./keycloak/realm-clinicadent.json:/opt/keycloak/data/import/realm-clinicadent.json:ro
+  oracle-db:
+    image: gvenzl/oracle-free:23-slim
+    container_name: clinicadent-oracle
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=123456
+      - APP_USER=CLINICADENT_APP
+      - APP_USER_PASSWORD=123456
+    volumes:
+      - oracle_data:/container_entrypoint_initdb.d/location
+volumes:
+  oracle_data:
+  keycloak_db_data:

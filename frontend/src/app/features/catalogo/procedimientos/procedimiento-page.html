@@ -1,0 +1,23 @@
+<div class="page-heading-row"><div><p class="eyebrow">Módulo 2 · Catálogo y tratamientos</p><h1 class="page-title">Procedimientos</h1><p class="page-subtitle">Administra el tarifario y la especialidad asociada a cada procedimiento.</p></div></div>
+@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
+@if (success()) { <p class="success-message" role="status">{{ success() }}</p> }
+@if (auth.hasAnyRole('ADMINISTRADOR')) {
+<section class="form-panel form-panel-expanded">
+  <h2 class="section-heading">{{ editingId() ? 'Editar procedimiento' : 'Registrar procedimiento' }}</h2>
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="clinic-form-grid">
+      <div class="field"><label for="proc-nombre">Nombre *</label><input id="proc-nombre" formControlName="nombre" maxlength="100" /></div>
+      <div class="field"><label for="proc-especialidad">Especialidad</label><select id="proc-especialidad" formControlName="idEspecialidad"><option value="">Sin especialidad</option>@for (especialidad of especialidades(); track especialidad.id) { <option [value]="especialidad.id">{{ especialidad.nombre }}</option> }</select></div>
+      <div class="field"><label for="proc-precio">Precio (S/) *</label><input id="proc-precio" type="number" min="0" step="0.01" formControlName="precio" /></div>
+    </div>
+    <div class="form-actions"><button class="button" type="submit" [disabled]="loading()">{{ loading() ? 'Guardando...' : (editingId() ? 'Guardar cambios' : 'Registrar procedimiento') }}</button>@if (editingId()) { <button class="button-secondary" type="button" (click)="cancelarEdicion()">Cancelar edición</button> }</div>
+  </form>
+</section>
+}
+<div class="table-wrap"><table class="data-table">
+  <thead><tr><th>Procedimiento</th><th>Especialidad</th><th>Precio</th>@if (auth.hasAnyRole('ADMINISTRADOR')) { <th class="actions-cell">Acciones</th> }</tr></thead>
+  <tbody>@if (loading() && items().length === 0) { <tr><td colspan="4" class="loading-row">Cargando tarifario...</td></tr> }
+    @for (item of items(); track item.id) { <tr><td class="name-cell">{{ item.nombre }}</td><td>{{ nombreEspecialidad(item.idEspecialidad) }}</td><td>S/ {{ item.precio | number:'1.2-2' }}</td>@if (auth.hasAnyRole('ADMINISTRADOR')) { <td class="actions-cell"><button class="text-link" type="button" (click)="editar(item)">Editar</button><button class="button-danger" type="button" (click)="eliminar(item)">Eliminar</button></td> }</tr> }
+    @empty { @if (!loading()) { <tr><td colspan="4" class="empty-cell">No hay procedimientos registrados.</td></tr> } }
+  </tbody>
+</table></div>

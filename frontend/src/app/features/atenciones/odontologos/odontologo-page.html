@@ -1,0 +1,22 @@
+<div class="page-heading-row"><div><p class="eyebrow">Módulo 3 · Atenciones clínicas</p><h1 class="page-title">Odontólogos</h1><p class="page-subtitle">Administra el personal clínico y su registro profesional.</p></div></div>
+@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
+@if (success()) { <p class="success-message" role="status">{{ success() }}</p> }
+<section class="form-panel form-panel-expanded">
+  <h2 class="section-heading">{{ editingId() ? 'Editar odontólogo' : 'Registrar odontólogo' }}</h2>
+  <form class="form-grid" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <div class="clinic-form-grid">
+      <div class="field"><label for="cop">COP *</label><input id="cop" formControlName="cop" maxlength="20" /></div>
+      <div class="field"><label for="odo-nombres">Nombres *</label><input id="odo-nombres" formControlName="nombres" maxlength="80" /></div>
+      <div class="field"><label for="odo-apellidos">Apellidos *</label><input id="odo-apellidos" formControlName="apellidos" maxlength="80" /></div>
+      <div class="field"><label for="odo-especialidad">Especialidad *</label><input id="odo-especialidad" formControlName="especialidad" maxlength="100" /></div>
+    </div>
+    <div class="form-actions"><button class="button" type="submit" [disabled]="loading()">{{ loading() ? 'Guardando...' : (editingId() ? 'Guardar cambios' : 'Registrar odontólogo') }}</button>@if (editingId()) { <button class="button-secondary" type="button" (click)="cancelarEdicion()">Cancelar edición</button> }</div>
+  </form>
+</section>
+<div class="table-wrap"><table class="data-table">
+  <thead><tr><th>COP</th><th>Odontólogo</th><th>Especialidad</th><th class="actions-cell">Acciones</th></tr></thead>
+  <tbody>@if (loading() && items().length === 0) { <tr><td colspan="4" class="loading-row">Cargando odontólogos...</td></tr> }
+    @for (item of items(); track item.id) { <tr><td>{{ item.cop }}</td><td class="name-cell">{{ item.apellidos }}, {{ item.nombres }}</td><td>{{ item.especialidad }}</td><td class="actions-cell"><button class="text-link" type="button" (click)="editar(item)">Editar</button><button class="button-danger" type="button" (click)="eliminar(item)">Eliminar</button></td></tr> }
+    @empty { @if (!loading()) { <tr><td colspan="4" class="empty-cell">No hay odontólogos registrados.</td></tr> } }
+  </tbody>
+</table></div>

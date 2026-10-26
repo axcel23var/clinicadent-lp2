@@ -1,0 +1,115 @@
+:root {
+  --ink: #172033;
+  --muted: #64748b;
+  --line: #d8dee9;
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --primary: #2457a7;
+  --primary-dark: #173f7a;
+  --danger: #b42318;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.topbar {
+  padding: 30px clamp(16px, 5vw, 56px);
+  background: #102f5f;
+  color: white;
+}
+
+.topbar h1 { margin: 4px 0 8px; font-size: clamp(28px, 4vw, 42px); }
+.topbar p { margin: 0; color: #dbe7ff; max-width: 900px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 800; }
+
+.layout {
+  width: min(1180px, calc(100% - 32px));
+  margin: 24px auto 48px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.wide { grid-column: 1 / -1; }
+.panel h2 { margin: 0 0 14px; font-size: 21px; }
+.hint { color: var(--muted); }
+
+form, .two {
+  display: grid;
+  gap: 12px;
+}
+
+.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+label {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+}
+
+input, select {
+  min-height: 42px;
+  border: 1px solid #b9c4d3;
+  border-radius: 6px;
+  padding: 9px 11px;
+  font: inherit;
+}
+
+button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 14px;
+  color: white;
+  background: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:hover { background: var(--primary-dark); }
+.secondary { color: var(--primary); background: #e7eef9; }
+.danger { background: var(--danger); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+pre {
+  overflow: auto;
+  min-height: 72px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #101827;
+  color: #e2e8f0;
+}
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; min-width: 820px; border-collapse: collapse; }
+th, td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; }
+th { background: #eef3fb; }
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.CREADA, .normal { background: #eef3fb; color: #334155; }
+.APROBADA, .alta { background: #dcfce7; color: #166534; }
+.ANULADA, .urgente { background: #fde2e1; color: #a61b14; }
+
+@media (max-width: 900px) {
+  .layout, .two { grid-template-columns: 1fr; }
+}

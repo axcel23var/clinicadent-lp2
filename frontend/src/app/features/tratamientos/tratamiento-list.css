@@ -1,0 +1,253 @@
+:host {
+	display: block;
+}
+
+.treatment-form-panel {
+	max-width: none;
+	margin-bottom: 38px;
+	padding: 0;
+	border-top: 4px solid var(--green);
+	box-shadow: 0 12px 32px rgba(24, 49, 47, 0.06);
+}
+
+.section-intro {
+	margin: 0;
+	padding: 27px 30px 20px;
+	border-bottom: 1px solid var(--line);
+}
+
+.section-intro .section-heading { font-size: 21px; }
+
+.treatment-workspace {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 260px;
+	align-items: start;
+	gap: 22px;
+	padding: 24px 30px 30px;
+}
+
+.treatment-patient-field,
+.procedure-picker { grid-column: 1 / -1; }
+
+.treatment-patient-field { max-width: 620px; }
+
+.section-intro .eyebrow,
+.plans-heading .eyebrow {
+	margin-bottom: 7px;
+}
+
+.section-heading {
+	margin-bottom: 6px;
+}
+
+.section-description,
+.loading-inline {
+	margin-bottom: 0;
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.loading-inline {
+	padding: 14px 0;
+}
+
+.field select {
+	width: 100%;
+	min-height: 42px;
+	padding: 9px 12px;
+	color: var(--ink);
+	background: white;
+	border: 1px solid #cbd8d0;
+	border-radius: 4px;
+	outline: none;
+}
+
+.field select:focus {
+	border-color: var(--green);
+	box-shadow: 0 0 0 3px rgba(38, 117, 107, 0.12);
+}
+
+.procedure-picker {
+	display: grid;
+	grid-template-columns: minmax(220px, 1fr) 120px auto;
+	align-items: end;
+	gap: 12px;
+}
+
+.add-procedure-button {
+	margin-bottom: 1px;
+}
+
+.quantity-field input {
+	min-height: 42px;
+}
+
+.selected-procedures {
+	display: grid;
+	gap: 12px;
+	min-width: 0;
+}
+
+.selected-heading,
+.plans-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+}
+
+.selected-heading h3 {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.selected-heading .eyebrow { margin: 0 0 5px; font-size: 9px; }
+
+.selected-heading span,
+.plan-count {
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.empty-selection {
+	margin: 0;
+	padding: 18px;
+	color: var(--muted);
+	background: #f8faf8;
+	border: 1px dashed var(--line);
+	border-radius: 5px;
+	font-size: 13px;
+	text-align: center;
+}
+
+.detail-counter {
+	padding: 6px 10px;
+	color: var(--green-dark);
+	background: var(--mint);
+	border-radius: 4px;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.transaction-summary {
+	position: sticky;
+	top: 18px;
+	display: grid;
+	gap: 17px;
+	padding: 20px;
+	color: white;
+	background: var(--green-dark);
+	border-radius: 6px;
+}
+
+.transaction-summary .button { width: 100%; color: var(--green-dark); background: white; }
+.summary-kicker { margin: 0; color: #a6d7c9; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.summary-line, .summary-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; }
+.summary-line { color: #d2e2dc; }
+.summary-total { align-items: flex-start; flex-direction: column; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.2); }
+.summary-total strong { font-family: 'Manrope', sans-serif; font-size: 25px; }
+.summary-note { margin: -8px 0 0; color: #c6d9d3; font-size: 10px; line-height: 1.5; }
+
+.plans-section { padding-top: 6px; }
+.plans-heading { padding-bottom: 5px; border-bottom: 1px solid var(--line); }
+.plan-count { padding: 7px 11px; background: white; border: 1px solid var(--line); border-radius: 4px; }
+
+.plans-section {
+	display: grid;
+	gap: 15px;
+}
+
+.plans-heading {
+	align-items: flex-end;
+}
+
+.plans-heading .section-heading {
+	margin-bottom: 0;
+}
+
+.plans-table td {
+	white-space: nowrap;
+}
+
+.plans-table .procedure-list {
+	min-width: 190px;
+	white-space: normal;
+}
+
+.procedure-list span {
+	display: block;
+	margin: 2px 0;
+}
+
+.status-badge {
+	display: inline-flex;
+	padding: 5px 8px;
+	color: var(--green-dark);
+	background: var(--mint);
+	border-radius: 999px;
+	font-size: 10px;
+	font-weight: 700;
+}
+
+.refresh-button {
+	flex: 0 0 auto;
+}
+
+.add-to-plan-panel {
+	max-width: none;
+	margin-top: 22px;
+}
+
+.status-select {
+	max-width: 140px;
+	min-height: 34px;
+	margin: 4px;
+	padding: 4px 7px;
+	color: var(--ink);
+	background: white;
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	font-size: 11px;
+}
+
+@media (max-width: 760px) {
+	.treatment-workspace { grid-template-columns: 1fr; padding: 20px; }
+	.transaction-summary { position: static; }
+	.section-intro { padding: 22px 20px 18px; }
+	.procedure-picker {
+		grid-template-columns: minmax(0, 1fr) 100px;
+	}
+
+	.add-procedure-button {
+		grid-column: 1 / -1;
+		justify-self: start;
+	}
+
+	.plans-heading {
+		align-items: flex-start;
+	}
+}
+
+@media (max-width: 500px) {
+	.treatment-workspace { padding: 17px; }
+	.refresh-button {
+		min-height: 38px;
+	}
+
+	.procedure-picker {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.add-procedure-button {
+		grid-column: auto;
+		justify-self: stretch;
+	}
+
+	.selected-heading {
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 4px;
+	}
+}

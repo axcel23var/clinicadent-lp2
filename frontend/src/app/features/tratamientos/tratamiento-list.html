@@ -1,0 +1,255 @@
+<div class="page-heading-row">
+  <div>
+    <p class="eyebrow">Atención clínica</p>
+    <h1 class="page-title">Planes de tratamiento</h1>
+    <p class="page-subtitle">
+      Vincula un paciente con uno o más procedimientos y consulta el costo y saldo del plan.
+    </p>
+  </div>
+  <button class="button-secondary refresh-button" type="button" (click)="cargar()" [disabled]="loading()">
+    {{ loading() ? 'Actualizando...' : 'Actualizar lista' }}
+  </button>
+</div>
+
+@if (error()) {
+  <p class="error-message" role="alert">{{ error() }}</p>
+}
+@if (success()) {
+  <p class="success-message" role="status">{{ success() }}</p>
+}
+
+<section class="form-panel treatment-form-panel transaction-panel" aria-labelledby="create-treatment-title">
+  <div class="section-intro">
+    <p class="eyebrow">Nuevo plan</p>
+    <h2 class="section-heading" id="create-treatment-title">Crear plan de tratamiento</h2>
+    <p class="section-description">
+      Agrega varios procedimientos; el backend calculará el costo total y el saldo inicial.
+    </p>
+  </div>
+
+  @if (loading() && pacientes().length === 0) {
+    <p class="loading-inline">Cargando pacientes y catálogo de procedimientos...</p>
+  } @else {
+    <form class="treatment-workspace" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      <div class="field treatment-patient-field">
+        <label for="paciente">Paciente <span aria-hidden="true">*</span></label>
+        <select
+          id="paciente"
+          formControlName="idPaciente"
+          [attr.aria-invalid]="form.controls.idPaciente.touched && form.controls.idPaciente.invalid"
+        >
+          <option value="" disabled>Selecciona un paciente</option>
+          @for (paciente of pacientes(); track paciente.id) {
+            <option [value]="paciente.id">
+              {{ paciente.apellidos }}, {{ paciente.nombres }} · DNI {{ paciente.dni }}
+            </option>
+          }
+        </select>
+        @if (form.controls.idPaciente.touched && form.controls.idPaciente.hasError('required')) {
+          <p class="validation-message">Selecciona el paciente del plan.</p>
+        }
+        @if (pacientes().length === 0) {
+          <p class="field-hint">No hay pacientes disponibles. Registra primero un paciente.</p>
+        }
+      </div>
+
+      <div class="procedure-picker">
+        <div class="field">
+          <label for="procedimiento">Procedimiento</label>
+          <select
+            id="procedimiento"
+            formControlName="idProcedimiento"
+            [attr.aria-invalid]="form.controls.idProcedimiento.touched && form.controls.idProcedimiento.invalid"
+          >
+            <option value="" disabled>Selecciona un procedimiento</option>
+            @for (procedimiento of procedimientos(); track procedimiento.id) {
+              <option [value]="procedimiento.id">
+                {{ procedimiento.nombre }} · S/ {{ procedimiento.precio | number: '1.2-2' }}
+              </option>
+            }
+          </select>
+          @if (form.controls.idProcedimiento.touched && form.controls.idProcedimiento.invalid) {
+            <p class="validation-message">Selecciona un procedimiento.</p>
+          }
+        </div>
+        <div class="field quantity-field">
+          <label for="cantidad">Cantidad</label>
+          <input
+            id="cantidad"
+            type="number"
+            min="1"
+            step="1"
+            formControlName="cantidad"
+            [attr.aria-invalid]="form.controls.cantidad.touched && form.controls.cantidad.invalid"
+          />
+          @if (form.controls.cantidad.touched && form.controls.cantidad.invalid) {
+            <p class="validation-message">La cantidad debe ser al menos 1.</p>
+          }
+        </div>
+        <button
+          class="button-secondary add-procedure-button"
+          type="button"
+          (click)="agregarProcedimiento()"
+          [disabled]="procedimientos().length === 0"
+        >
+          Agregar procedimiento
+        </button>
+      </div>
+
+      <div class="selected-procedures">
+        <div class="selected-heading">
+          <div><p class="eyebrow">Detalle de operación</p><h3>Procedimientos del plan</h3></div>
+          <span class="detail-counter">{{ detalles().length }} ítems</span>
+        </div>
+        @if (detalles().length > 0) {
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Procedimiento</th>
+                  <th scope="col">Precio unitario</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Subtotal</th>
+                  <th scope="col"><span class="sr-only">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (detalle of detalles(); track detalle.idProcedimiento) {
+                  <tr>
+                    <td class="name-cell">{{ detalle.nombreProcedimiento }}</td>
+                    <td>S/ {{ detalle.precioUnitario | number: '1.2-2' }}</td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>S/ {{ detalle.precioUnitario * detalle.cantidad | number: '1.2-2' }}</td>
+                    <td class="actions-cell">
+                      <button
+                        class="button-danger"
+                        type="button"
+                        (click)="quitarProcedimiento(detalle.idProcedimiento)"
+                      >
+                        Quitar
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="empty-selection">Aún no agregas procedimientos a este plan.</p>
+        }
+      </div>
+
+      <aside class="transaction-summary" aria-label="Resumen del plan">
+        <p class="summary-kicker">Resumen de operación</p>
+        <div class="summary-line"><span>Procedimientos</span><strong>{{ detalles().length }}</strong></div>
+        <div class="summary-total"><span>Costo estimado</span><strong>S/ {{ totalEstimado() | number: '1.2-2' }}</strong></div>
+        <button
+          class="button"
+          type="submit"
+          [disabled]="saving() || pacientes().length === 0 || procedimientos().length === 0"
+        >
+          {{ saving() ? 'Creando plan...' : 'Crear plan' }}
+        </button>
+        <p class="summary-note">El saldo inicial se calcula al guardar.</p>
+      </aside>
+    </form>
+  }
+</section>
+
+<section class="plans-section" aria-labelledby="plans-title">
+  <div class="plans-heading">
+    <div>
+      <p class="eyebrow">Seguimiento</p>
+      <h2 class="section-heading" id="plans-title">Planes registrados</h2>
+    </div>
+    <span class="plan-count">{{ tratamientos().length }} planes</span>
+  </div>
+
+  @if (loading() && tratamientos().length === 0) {
+    <div class="table-wrap"><p class="loading-row">Cargando planes...</p></div>
+  } @else if (tratamientos().length > 0) {
+    <div class="table-wrap">
+      <table class="data-table plans-table">
+        <thead>
+          <tr>
+            <th scope="col">Plan</th>
+            <th scope="col">Paciente</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Procedimientos</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Costo total</th>
+            <th scope="col">Saldo pendiente</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tratamiento of tratamientos(); track tratamiento.id) {
+            <tr>
+              <td class="name-cell">#{{ tratamiento.id }}</td>
+              <td>{{ nombrePaciente(tratamiento.idPaciente) }}</td>
+              <td>{{ tratamiento.fechaCreacion | date: 'dd/MM/yyyy' }}</td>
+              <td class="procedure-list">
+                @for (detalle of tratamiento.detalles; track detalle.id) {
+                  <span>
+                    {{ nombreProcedimiento(detalle.idProcedimiento) }} × {{ detalle.cantidad }}
+                  </span>
+                } @empty {
+                  <span>Sin procedimientos</span>
+                }
+              </td>
+              <td><span class="status-badge">{{ tratamiento.estado }}</span></td>
+              <td>S/ {{ tratamiento.costoTotal | number: '1.2-2' }}</td>
+              <td>S/ {{ tratamiento.saldoPendiente | number: '1.2-2' }}</td>
+              <td class="actions-cell">
+                @if (tratamiento.estado !== 'FINALIZADO') {
+                  <button class="text-link" type="button" (click)="seleccionarPlan(tratamiento.id)">Agregar procedimiento</button>
+                }
+                <select
+                  class="status-select"
+                  [value]="tratamiento.estado"
+                  [attr.aria-label]="'Cambiar estado del plan ' + tratamiento.id"
+                  (change)="cambiarEstado(tratamiento.id, $event)"
+                >
+                  @for (estado of estadosDisponibles(tratamiento.estado); track estado) {
+                    <option [value]="estado">{{ estado }}</option>
+                  }
+                </select>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <p class="empty-cell">Todavía no hay planes de tratamiento registrados.</p>
+    </div>
+  }
+</section>
+
+@if (selectedPlanId(); as planId) {
+  <section class="form-panel add-to-plan-panel" aria-labelledby="add-to-plan-title">
+    <h2 class="section-heading" id="add-to-plan-title">Agregar procedimiento al plan #{{ planId }}</h2>
+    <form class="procedure-picker" [formGroup]="addForm" (ngSubmit)="agregarAPlan()" novalidate>
+      <div class="field">
+        <label for="add-plan-procedure">Procedimiento</label>
+        <select id="add-plan-procedure" formControlName="idProcedimiento">
+          <option value="" disabled>Selecciona un procedimiento</option>
+          @for (procedimiento of procedimientos(); track procedimiento.id) {
+            <option [value]="procedimiento.id">{{ procedimiento.nombre }} · S/ {{ procedimiento.precio | number: '1.2-2' }}</option>
+          }
+        </select>
+      </div>
+      <div class="field quantity-field">
+        <label for="add-plan-quantity">Cantidad</label>
+        <input id="add-plan-quantity" type="number" min="1" step="1" formControlName="cantidad" />
+      </div>
+      <div class="form-actions">
+        <button class="button" type="submit" [disabled]="savingPlanId() === planId">
+          {{ savingPlanId() === planId ? 'Agregando...' : 'Agregar al plan' }}
+        </button>
+        <button class="button-secondary" type="button" (click)="cancelarAgregarProcedimiento()">Cerrar</button>
+      </div>
+    </form>
+  </section>
+}

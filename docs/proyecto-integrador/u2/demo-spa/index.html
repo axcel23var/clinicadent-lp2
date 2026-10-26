@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Base BomERP U2 - SPA</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+  <header class="topbar"><div><p>Producto U2 - LP2</p><h1>SPA segura de ventas</h1></div><button id="logoutBtn">Salir</button></header>
+  <main class="layout">
+    <section class="panel" id="loginPanel"><h2>Login</h2><p>Usuario: <strong>admin</strong> / Clave: <strong>admin123</strong></p><input id="user" placeholder="usuario"><input id="pass" placeholder="clave" type="password"><button id="loginBtn">Ingresar</button><p id="msg"></p></section>
+    <section id="appPanel" class="hidden">
+      <section class="cards"><article><strong id="total">0</strong><span>Ventas</span></article><article><strong id="activas">0</strong><span>Activas</span></article><article><strong id="anuladas">0</strong><span>Anuladas</span></article></section>
+      <section class="panel">
+        <h2>Nueva venta</h2>
+        <input id="cliente" placeholder="Cliente" value="María Quispe">
+        <select id="producto"><option value="Pack escolar" data-precio="45">Pack escolar</option><option value="Caja de lapiceros" data-precio="18.5">Caja de lapiceros</option><option value="Mochila urbana" data-precio="89.9">Mochila urbana</option></select>
+        <input id="cantidad" type="number" min="1" value="2">
+        <button id="crearBtn">Registrar venta</button><p id="formMsg"></p>
+      </section>
+      <section class="panel"><h2>Ventas</h2><select id="estado"><option value="TODAS">Todas</option><option>ACTIVA</option><option>ANULADA</option></select><table><thead><tr><th>ID</th><th>Cliente</th><th>Detalle</th><th>Total</th><th>Estado</th><th>Acción</th></tr></thead><tbody id="tbody"></tbody></table></section>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

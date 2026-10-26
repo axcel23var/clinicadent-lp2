@@ -1,0 +1,205 @@
+<div class="page-heading-row"><div><p class="eyebrow">Módulo 4 · Pagos y caja</p><h1 class="page-title">Caja clínica</h1><p class="page-subtitle">Pagos registrados · {{ items().length }}</p></div></div>
+@if (error()) { <p class="error-message" role="alert">{{ error() }}</p> }
+@if (success()) { <p class="success-message" role="status">{{ success() }}</p> }
+<div class="clinic-two-column">
+  <section class="transaction-card payment-workflow" aria-labelledby="payment-title">
+    <header class="transaction-head"><span class="transaction-mark">04</span><div><p class="eyebrow">Nueva operación de caja</p><h2 id="payment-title">Registrar abono</h2></div></header>
+    <form class="transaction-layout" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      <div class="transaction-main">
+        <section class="transaction-section"><div class="transaction-section-title"><span>1</span><div><h3>Distribución entre tratamientos</h3><p>Un recibo puede cubrir varios planes</p></div></div>
+          <div class="detail-entry-grid">
+            <div class="field"><label for="pago-tratamiento">Plan de tratamiento *</label><select id="pago-tratamiento" formControlName="idTratamiento" (change)="onTratamientoChange($event)"><option value="" disabled>Selecciona un plan con saldo</option>@for (item of tratamientos(); track item.id) { @if (item.saldoPendiente > 0) { <option [value]="item.id">Plan #{{ item.id }} · Paciente #{{ item.idPaciente }} · Saldo S/ {{ item.saldoPendiente | number:'1.2-2' }}</option> } }</select></div>
+            <div class="field"><label for="monto-tratamiento">Monto aplicado (S/) *</label><input id="monto-tratamiento" type="number" min="0.01" step="0.01" formControlName="montoTratamiento" /></div>
+            <button class="button-secondary" type="button" (click)="agregarTratamientoAbono()">Añadir tratamiento</button>
+          </div>
+          @if (distribucionesAbono().length > 0) { <div class="table-wrap transaction-table"><table class="data-table"><thead><tr><th>Tratamiento</th><th>Saldo</th><th>Aplicado</th><th class="actions-cell">Acción</th></tr></thead><tbody>@for (distribucion of distribucionesAbono(); track distribucion.idTratamiento) { <tr><td class="name-cell">{{ distribucion.nombreTratamiento }}</td><td>S/ {{ saldo(distribucion.idTratamiento) | number:'1.2-2' }}</td><td>S/ {{ distribucion.montoAplicado | number:'1.2-2' }}</td><td class="actions-cell"><button class="button-danger" type="button" (click)="quitarTratamientoAbono(distribucion.idTratamiento)">Quitar</button></td></tr> }</tbody></table></div> } @else { <p class="transaction-empty">Todavía no hay tratamientos asociados al recibo.</p> }
+        </section>
+        <section class="transaction-section"><div class="transaction-section-title"><span>2</span><div><h3>Distribución del pago</h3><p>El abono puede combinar varios medios</p></div></div>
+          <div class="detail-entry-grid payment-entry-grid">
+            <div class="field"><label for="metodo">Método *</label><select id="metodo" formControlName="idMetodoPago"><option value="" disabled>Selecciona método</option>@for (metodo of metodos(); track metodo.id) { <option [value]="metodo.id">{{ metodo.nombre }}</option> }</select></div>
+            <div class="field"><label for="monto">Monto (S/) *</label><input id="monto" type="number" min="0.01" step="0.01" formControlName="montoAbono" /></div>
+            <div class="field"><label for="operacion">N.º de operación</label><input id="operacion" formControlName="numeroOperacion" maxlength="50" /></div>
+            <button class="button-secondary" type="button" (click)="agregarMetodoAbono()" [disabled]="metodos().length === 0">Añadir al pago</button>
+          </div>
+          @if (detallesAbono().length > 0) { <div class="table-wrap transaction-table"><table class="data-table"><thead><tr><th>Método</th><th>Monto</th><th>Operación</th><th class="actions-cell">Acción</th></tr></thead><tbody>@for (detalle of detallesAbono(); track detalle.idMetodoPago) { <tr><td class="name-cell">{{ detalle.nombreMetodo }}</td><td>S/ {{ detalle.montoAbonado | number:'1.2-2' }}</td><td>{{ detalle.numeroOperacion || '—' }}</td><td class="actions-cell"><button class="button-danger" type="button" (click)="quitarMetodoAbono(detalle.idMetodoPago)">Quitar</button></td></tr> }</tbody></table></div> } @else { <p class="transaction-empty">El pago aún no tiene medios asignados.</p> }
+        </section>
+      </div>
+      <aside class="transaction-summary payment-summary"><p class="summary-kicker">Conciliación</p><div class="summary-value"><span>Saldo previo combinado</span><strong>S/ {{ saldoSeleccionado() | number:'1.2-2' }}</strong></div><div class="summary-total"><span>Total del recibo</span><strong>S/ {{ totalAbono() | number:'1.2-2' }}</strong></div><div class="summary-value"><span>Saldo restante combinado</span><strong>S/ {{ saldoRestante() | number:'1.2-2' }}</strong></div><button class="button" type="submit" [disabled]="saving() || detallesAbono().length === 0 || distribucionesAbono().length === 0">{{ saving() ? 'Registrando...' : 'Confirmar recibo' }}</button></aside>
+    </form>
+  </section>
+  <section class="form-panel form-panel-fluid">
+    <h2 class="section-heading">Métodos de pago</h2>
+    <p class="section-description">Añade los medios aceptados por la clínica para registrar abonos.</p>
+    <form class="form-grid compact-form" [formGroup]="metodoForm" (ngSubmit)="registrarMetodo()" novalidate>
+      <div class="field"><label for="metodo-nombre">Nombre *</label><input id="metodo-nombre" formControlName="nombre" maxlength="50" placeholder="Efectivo, tarjeta, Yape..." /></div>
+      <div class="field"><label for="metodo-descripcion">Descripción</label><input id="metodo-descripcion" formControlName="descripcion" maxlength="150" /></div>
+      <button class="button-secondary" type="submit">Registrar método</button>
+    </form>
+    <ul class="method-list">@for (metodo of metodos(); track metodo.id) { <li><strong>{{ metodo.nombre }}</strong><span>{{ metodo.descripcion || 'Sin descripción' }}</span></li> } @empty { <li class="empty-selection">No hay métodos de pago registrados.</li> }</ul>
+  </section>
+</div>
+<section class="plans-section plans-section-spaced transaction-history">
+  <div class="plans-heading"><div><p class="eyebrow">Historial</p><h2 class="section-heading">Pagos registrados</h2></div><span class="plan-count">{{ items().length }} pagos</span></div>
+  <div class="table-wrap payment-table-wrap"><table class="data-table payment-history-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Fecha y hora</th>
+        <th>Total del recibo</th>
+        <th>Estado</th>
+        <th class="actions-cell">Desglose de detalles</th>
+      </tr>
+    </thead>
+    <tbody>@if (loading() && items().length === 0) { <tr><td colspan="5" class="loading-row">Cargando pagos...</td></tr> }
+      @for (item of items(); track item.id) {
+        <tr class="payment-main-row" [class.is-expanded]="pagoSeleccionado() === item.id">
+          <td class="name-cell payment-id-cell">
+            <span class="payment-id-tag">#{{ item.id }}</span>
+          </td>
+          <td class="payment-date-cell">{{ item.fechaPago | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="payment-total-cell">
+            <strong class="receipt-amount">S/ {{ item.montoTotal | number:'1.2-2' }}</strong>
+          </td>
+          <td><span class="status-badge" [attr.data-status]="item.estado">{{ item.estado }}</span></td>
+          <td class="actions-cell">
+            <button
+              type="button"
+              class="btn-toggle-breakdown"
+              [class.is-expanded]="pagoSeleccionado() === item.id"
+              (click)="togglePago(item.id)"
+              [attr.aria-expanded]="pagoSeleccionado() === item.id"
+              title="Ver desglose de tratamientos y métodos">
+              <span>{{ pagoSeleccionado() === item.id ? 'Ocultar desglose' : 'Ver desglose' }}</span>
+              <svg class="chevron-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </td>
+        </tr>
+        @if (pagoSeleccionado() === item.id) {
+          <tr class="payment-breakdown-row">
+            <td colspan="5" class="payment-breakdown-cell">
+              <div class="payment-subcard">
+                <div class="subcard-header">
+                  <div class="subcard-title-group">
+                    <span class="subcard-icon" aria-hidden="true">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                      </svg>
+                    </span>
+                    <div>
+                      <h4 class="subcard-title">Desglose de detalles · Recibo #{{ item.id }}</h4>
+                      <p class="subcard-subtitle">Fecha de registro: {{ item.fechaPago | date:'dd/MM/yyyy HH:mm' }}</p>
+                    </div>
+                  </div>
+                  <div class="subcard-summary-pill">
+                    <span class="pill-label">Total cubierto:</span>
+                    <strong class="pill-amount">S/ {{ item.montoTotal | number:'1.2-2' }}</strong>
+                  </div>
+                </div>
+
+                <div class="subcard-grid">
+                  <!-- 1. Tabla de Distribución (Plan / Tratamiento, Monto Aplicado) -->
+                  <div class="subcard-panel">
+                    <div class="subcard-panel-head">
+                      <span class="subcard-panel-tag">1</span>
+                      <div>
+                        <h5 class="subcard-panel-title">Tabla de Distribución</h5>
+                        <p class="subcard-panel-caption">Montos aplicados a tratamientos</p>
+                      </div>
+                    </div>
+                    <div class="subcard-table-wrap">
+                      <table class="sub-data-table">
+                        <thead>
+                          <tr>
+                            <th>Plan / Tratamiento</th>
+                            <th class="text-right">Monto Aplicado</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @if (item.distribuciones && item.distribuciones.length > 0) {
+                            @for (dist of item.distribuciones; track dist.id) {
+                              <tr>
+                                <td class="sub-col-main">
+                                  <span class="sub-plan-badge">Plan #{{ dist.idTratamiento }}</span>
+                                </td>
+                                <td class="sub-col-amount text-right">
+                                  S/ {{ dist.montoAplicado | number:'1.2-2' }}
+                                </td>
+                              </tr>
+                            }
+                          } @else if (item.idTratamiento) {
+                            <tr>
+                              <td class="sub-col-main">
+                                <span class="sub-plan-badge">Plan #{{ item.idTratamiento }}</span>
+                              </td>
+                              <td class="sub-col-amount text-right">
+                                S/ {{ item.montoTotal | number:'1.2-2' }}
+                              </td>
+                            </tr>
+                          } @else {
+                            <tr>
+                              <td colspan="2" class="empty-subtable">Sin distribución asignada.</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <!-- 2. Tabla de Métodos de Pago (Método, Monto Abonado, N° Operación) -->
+                  <div class="subcard-panel">
+                    <div class="subcard-panel-head">
+                      <span class="subcard-panel-tag">2</span>
+                      <div>
+                        <h5 class="subcard-panel-title">Tabla de Métodos de Pago</h5>
+                        <p class="subcard-panel-caption">Abonos recibidos y medios de cobro</p>
+                      </div>
+                    </div>
+                    <div class="subcard-table-wrap">
+                      <table class="sub-data-table">
+                        <thead>
+                          <tr>
+                            <th>Método</th>
+                            <th class="text-right">Monto Abonado</th>
+                            <th>N° Operación</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @if (item.detalles && item.detalles.length > 0) {
+                            @for (det of item.detalles; track det.id) {
+                              <tr>
+                                <td class="sub-col-main">
+                                  <span class="sub-method-tag">{{ nombreMetodo(det.idMetodoPago) }}</span>
+                                </td>
+                                <td class="sub-col-amount text-right">
+                                  S/ {{ det.montoAbonado | number:'1.2-2' }}
+                                </td>
+                                <td class="sub-col-op">
+                                  {{ det.numeroOperacion || '—' }}
+                                </td>
+                              </tr>
+                            }
+                          } @else {
+                            <tr>
+                              <td colspan="3" class="empty-subtable">Sin abonos registrados.</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        }
+      }
+      @empty { @if (!loading()) { <tr><td colspan="5" class="empty-cell">No hay pagos registrados.</td></tr> } }
+    </tbody>
+  </table></div>
+</section>
