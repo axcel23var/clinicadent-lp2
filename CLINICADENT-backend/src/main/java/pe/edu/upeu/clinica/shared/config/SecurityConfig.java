@@ -58,11 +58,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/pacientes/**")
                         .hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.POST, "/api/v1/especialidades/**", "/api/v1/procedimientos/**",
-                                "/api/v1/odontologos/**", "/api/v1/metodos-pago/**")
+                                "/api/v1/odontologos/**")
                         .hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.GET, "/api/v1/odontologos/**")
                         .hasAnyRole("ADMINISTRADOR", "ODONTOLOGO")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/metodos-pago/**")
+                        .requestMatchers("/api/v1/metodos-pago/**")
                         .hasAnyRole("ADMINISTRADOR", "CAJERO")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/especialidades/**", "/api/v1/procedimientos/**",
                                 "/api/v1/odontologos/**")

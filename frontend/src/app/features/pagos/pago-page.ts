@@ -34,6 +34,9 @@ export class PagoPage implements OnInit {
   protected readonly success = signal<string | null>(null);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  protected readonly savingMetodo = signal(false);
+  protected readonly editingMetodoId = signal<number | null>(null);
+  protected readonly deletingMetodoId = signal<number | null>(null);
   protected readonly pagoSeleccionado = signal<number | null>(null);
   protected readonly form = this.fb.nonNullable.group({
     idTratamiento: ['', Validators.required],
@@ -207,17 +210,102 @@ export class PagoPage implements OnInit {
     );
   }
 
-  registrarMetodo(): void {
+  guardarMetodo(): void {
     this.error.set(null);
-    if (this.metodoForm.invalid) { this.metodoForm.markAllAsTouched(); return; }
+    this.success.set(null);
+    if (this.metodoForm.invalid) {
+      this.metodoForm.markAllAsTouched();
+      return;
+    }
     const value = this.metodoForm.getRawValue();
-    this.api.crearMetodoPago({ nombre: value.nombre.trim(), descripcion: value.descripcion.trim() }).subscribe({
-      next: (metodo) => {
-        this.metodos.update((items) => [...items, metodo]);
-        this.metodoForm.reset();
-        this.success.set(`Método de pago "${metodo.nombre}" registrado.`);
+    const payload = {
+      nombre: value.nombre.trim(),
+      descripcion: value.descripcion.trim(),
+    };
+    const editId = this.editingMetodoId();
+
+    this.savingMetodo.set(true);
+
+    if (editId !== null) {
+      this.api.actualizarMetodoPago(editId, payload).subscribe({
+        next: (metodoActualizado) => {
+          this.metodos.update((items) =>
+            items.map((m) => (m.id === editId ? metodoActualizado : m))
+          );
+          this.detallesAbono.update((details) =>
+            details.map((d) =>
+              d.idMetodoPago === editId ? { ...d, nombreMetodo: metodoActualizado.nombre } : d
+            )
+          );
+          this.cancelarEdicionMetodo();
+          this.success.set(`Método de pago "${metodoActualizado.nombre}" actualizado.`);
+          this.savingMetodo.set(false);
+        },
+        error: (err) => {
+          this.error.set(err.error?.mensaje || 'No se pudo actualizar el método de pago.');
+          this.savingMetodo.set(false);
+        },
+      });
+    } else {
+      this.api.crearMetodoPago(payload).subscribe({
+        next: (metodo) => {
+          this.metodos.update((items) => [...items, metodo]);
+          this.metodoForm.reset({ nombre: '', descripcion: '' });
+          this.success.set(`Método de pago "${metodo.nombre}" registrado.`);
+          this.savingMetodo.set(false);
+        },
+        error: (err) => {
+          this.error.set(err.error?.mensaje || 'No se pudo registrar el método de pago.');
+          this.savingMetodo.set(false);
+        },
+      });
+    }
+  }
+
+  registrarMetodo(): void {
+    this.guardarMetodo();
+  }
+
+  editarMetodo(metodo: MetodoPago): void {
+    this.editingMetodoId.set(metodo.id);
+    this.metodoForm.setValue({
+      nombre: metodo.nombre,
+      descripcion: metodo.descripcion ?? '',
+    });
+    this.error.set(null);
+    this.success.set(null);
+  }
+
+  cancelarEdicionMetodo(): void {
+    this.editingMetodoId.set(null);
+    this.metodoForm.reset({ nombre: '', descripcion: '' });
+  }
+
+  eliminarMetodo(metodo: MetodoPago): void {
+    if (!window.confirm(`¿Estás seguro de eliminar el método de pago "${metodo.nombre}"?`)) {
+      return;
+    }
+    this.error.set(null);
+    this.success.set(null);
+    this.deletingMetodoId.set(metodo.id);
+
+    this.api.eliminarMetodoPago(metodo.id).subscribe({
+      next: () => {
+        this.metodos.update((items) => items.filter((m) => m.id !== metodo.id));
+        this.detallesAbono.update((details) => details.filter((d) => d.idMetodoPago !== metodo.id));
+        if (this.editingMetodoId() === metodo.id) {
+          this.cancelarEdicionMetodo();
+        }
+        this.success.set(`Método de pago "${metodo.nombre}" eliminado correctamente.`);
+        this.deletingMetodoId.set(null);
       },
-      error: () => this.error.set('No se pudo registrar el método de pago.'),
+      error: (err) => {
+        this.error.set(
+          err.error?.mensaje ||
+          `No se pudo eliminar el método de pago "${metodo.nombre}". Puede que tenga pagos asociados.`
+        );
+        this.deletingMetodoId.set(null);
+      },
     });
   }
 

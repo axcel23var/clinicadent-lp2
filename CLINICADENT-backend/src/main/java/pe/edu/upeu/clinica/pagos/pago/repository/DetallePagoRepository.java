@@ -8,4 +8,6 @@ import java.util.List;
 public interface DetallePagoRepository extends JpaRepository<DetallePago, Long> {
 
     List<DetallePago> findByPagoId(Long idPago);
+
+    boolean existsByMetodoPagoId(Long metodoPagoId);
 }

@@ -6,4 +6,6 @@ import pe.edu.upeu.clinica.pagos.pago.entity.MetodoPago;
 public interface MetodoPagoRepository extends JpaRepository<MetodoPago, Long> {
 
     boolean existsByNombre(String nombre);
+
+    boolean existsByNombreAndIdNot(String nombre, Long id);
 }

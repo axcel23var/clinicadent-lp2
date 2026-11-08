@@ -9,5 +9,11 @@ public interface MetodoPagoService {
 
     MetodoPagoResponse crear(MetodoPagoRequest request);
 
+    MetodoPagoResponse obtenerPorId(Long id);
+
     List<MetodoPagoResponse> listar();
+
+    MetodoPagoResponse actualizar(Long id, MetodoPagoRequest request);
+
+    void eliminar(Long id);
 }

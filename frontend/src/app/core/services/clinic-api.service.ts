@@ -261,6 +261,17 @@ export class ClinicApiService {
     return this.http.post<MetodoPago>(this.url('metodos-pago'), request);
   }
 
+  actualizarMetodoPago(
+    id: number,
+    request: { nombre: string; descripcion: string },
+  ): Observable<MetodoPago> {
+    return this.http.put<MetodoPago>(this.url(`metodos-pago/${id}`), request);
+  }
+
+  eliminarMetodoPago(id: number): Observable<void> {
+    return this.http.delete<void>(this.url(`metodos-pago/${id}`));
+  }
+
   pagos(): Observable<Pago[]> {
     return this.http.get<Pago[]>(this.url('pagos'));
   }

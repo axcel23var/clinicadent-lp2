@@ -14,7 +14,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pe.edu.upeu.clinica.pagos.pago.entity.MetodoPago;
 
 import java.math.BigDecimal;
 

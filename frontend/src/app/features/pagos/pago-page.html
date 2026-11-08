@@ -28,14 +28,77 @@
     </form>
   </section>
   <section class="form-panel form-panel-fluid">
-    <h2 class="section-heading">Métodos de pago</h2>
-    <p class="section-description">Añade los medios aceptados por la clínica para registrar abonos.</p>
-    <form class="form-grid compact-form" [formGroup]="metodoForm" (ngSubmit)="registrarMetodo()" novalidate>
-      <div class="field"><label for="metodo-nombre">Nombre *</label><input id="metodo-nombre" formControlName="nombre" maxlength="50" placeholder="Efectivo, tarjeta, Yape..." /></div>
-      <div class="field"><label for="metodo-descripcion">Descripción</label><input id="metodo-descripcion" formControlName="descripcion" maxlength="150" /></div>
-      <button class="button-secondary" type="submit">Registrar método</button>
+    <div class="panel-header-with-badge">
+      <div>
+        <h2 class="section-heading">Métodos de pago</h2>
+        <p class="section-description">
+          {{ editingMetodoId() ? 'Modifica los datos del método seleccionado.' : 'Añade los medios aceptados por la clínica para registrar abonos.' }}
+        </p>
+      </div>
+      @if (editingMetodoId()) {
+        <span class="badge-editing">Modo edición</span>
+      }
+    </div>
+    <form class="form-grid compact-form" [formGroup]="metodoForm" (ngSubmit)="guardarMetodo()" novalidate>
+      <div class="field">
+        <label for="metodo-nombre">Nombre *</label>
+        <input id="metodo-nombre" formControlName="nombre" maxlength="50" placeholder="Efectivo, tarjeta, Yape..." />
+      </div>
+      <div class="field">
+        <label for="metodo-descripcion">Descripción</label>
+        <input id="metodo-descripcion" formControlName="descripcion" maxlength="150" placeholder="Detalles u observaciones del método" />
+      </div>
+      <div class="method-form-actions">
+        <button class="button-secondary" type="submit" [disabled]="savingMetodo()">
+          {{ editingMetodoId() ? (savingMetodo() ? 'Guardando...' : 'Actualizar método') : (savingMetodo() ? 'Registrando...' : 'Registrar método') }}
+        </button>
+        @if (editingMetodoId()) {
+          <button class="button-outline-cancel" type="button" (click)="cancelarEdicionMetodo()" [disabled]="savingMetodo()">
+            Cancelar
+          </button>
+        }
+      </div>
     </form>
-    <ul class="method-list">@for (metodo of metodos(); track metodo.id) { <li><strong>{{ metodo.nombre }}</strong><span>{{ metodo.descripcion || 'Sin descripción' }}</span></li> } @empty { <li class="empty-selection">No hay métodos de pago registrados.</li> }</ul>
+    <ul class="method-list">
+      @for (metodo of metodos(); track metodo.id) {
+        <li class="method-item" [class.is-editing]="editingMetodoId() === metodo.id">
+          <div class="method-info">
+            <strong class="method-name">{{ metodo.nombre }}</strong>
+            <span class="method-desc">{{ metodo.descripcion || 'Sin descripción' }}</span>
+          </div>
+          <div class="method-actions">
+            <button
+              type="button"
+              class="btn-method-action btn-edit"
+              (click)="editarMetodo(metodo)"
+              [disabled]="deletingMetodoId() === metodo.id"
+              title="Editar método de pago">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Editar</span>
+            </button>
+            <button
+              type="button"
+              class="btn-method-action btn-delete"
+              (click)="eliminarMetodo(metodo)"
+              [disabled]="deletingMetodoId() === metodo.id"
+              title="Eliminar método de pago">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+              <span>{{ deletingMetodoId() === metodo.id ? 'Borrando...' : 'Eliminar' }}</span>
+            </button>
+          </div>
+        </li>
+      } @empty {
+        <li class="empty-selection">No hay métodos de pago registrados.</li>
+      }
+    </ul>
   </section>
 </div>
 <section class="plans-section plans-section-spaced transaction-history">
